@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:id="@+id/containerLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/linearLayoutLoadWordsearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal|top"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/text_load_wordsearch_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/subtitle_load_wordsearch"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/button_load_wordsearch_photo"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:drawableStart="@drawable/ic_photo"
+                android:text="@string/load_wordsearch_photo_button_text" />
+
+            <Button
+                android:id="@+id/button_load_wordsearch_camera"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:drawableStart="@drawable/ic_camera"
+                android:text="@string/load_wordsearch_camera_button_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutLoadWords"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutLoadWordsearch"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/text_load_words_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/subtitle_load_words"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/button_load_words_photo"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:drawableStart="@drawable/ic_photo"
+                android:text="@string/load_wordsearch_photo_button_text" />
+
+            <Button
+                android:id="@+id/button_load_words_camera"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:drawableStart="@drawable/ic_camera"
+                android:text="@string/load_wordsearch_camera_button_text" />
+
+            <TextView
+                android:id="@+id/text_enter_words_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="@string/subtitle_enter_words"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/manualTextEntry"
+                android:layout_width="300dp"
+                android:layout_height="fill_parent"
+                android:hint="@string/words_text_entry_hint"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
+                android:textSize="12sp"></EditText>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

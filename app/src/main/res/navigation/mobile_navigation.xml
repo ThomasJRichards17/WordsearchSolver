@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_load">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.tjr.wordsearchsolver.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_load"
+        android:name="com.tjr.wordsearchsolver.ui.load.LoadFragment"
+        android:label="@string/title_load"
+        tools:layout="@layout/fragment_load" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
