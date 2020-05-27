@@ -106,7 +106,8 @@
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine"
                 android:scrollbars="vertical"
-                android:textSize="12sp"></EditText>
+                android:textSize="12sp" />
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
