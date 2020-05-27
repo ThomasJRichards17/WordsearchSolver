@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
@@ -29,8 +28,6 @@ import static com.tjr.wordsearchsolver.data.RequestCodes.TAKE_WORDS_PHOTO;
 
 public class LoadFragment extends Fragment implements View.OnClickListener {
 
-    ImageView image;
-
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.fragment_load, container, false);
@@ -47,8 +44,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
         Button loadWordsPhotoButton = root.findViewById(R.id.button_load_words_photo);
         loadWordsPhotoButton.setOnClickListener(this);
-
-        image = root.findViewById(R.id.imageView);
 
         return root;
     }
@@ -93,7 +88,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Make sure there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, requestCode);
             // Create the File where the photo should go
             File photoFile = null;
             try {
@@ -113,11 +107,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, requestCode);
-                try {
-                    image.setImageBitmap(MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), photoURI));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
