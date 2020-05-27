@@ -106,7 +106,13 @@
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine"
                 android:scrollbars="vertical"
-                android:textSize="12sp"></EditText>
+                android:textSize="12sp" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_camera" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

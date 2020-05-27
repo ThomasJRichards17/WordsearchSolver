@@ -1,13 +1,14 @@
 package com.tjr.wordsearchsolver.data;
 
-import java.io.File;
+import android.net.Uri;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataStore {
     private static DataStore dataStore;
-    private File wordsearchImage;
-    private File searchWordsImage;
+    private Uri wordsearchImage;
+    private Uri searchWordsImage;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
     private List<String> searchWords = new ArrayList<>();
 
@@ -24,19 +25,19 @@ public class DataStore {
         return dataStore;
     }
 
-    public File getWordsearchImage() {
+    public Uri getWordsearchImage() {
         return wordsearchImage;
     }
 
-    public void setWordsearchImage(File wordsearchImage) {
+    public void setWordsearchImage(Uri wordsearchImage) {
         this.wordsearchImage = wordsearchImage;
     }
 
-    public File getSearchWordsImage() {
+    public Uri getSearchWordsImage() {
         return searchWordsImage;
     }
 
-    public void setSearchWordsImage(File searchWordsImage) {
+    public void setSearchWordsImage(Uri searchWordsImage) {
         this.searchWordsImage = searchWordsImage;
     }
 
