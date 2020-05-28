@@ -11,6 +11,9 @@ public class DataStore {
     private Uri searchWordsImage;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
     private List<String> searchWords = new ArrayList<>();
+    private boolean isWordsearchFromCamera;
+    private boolean areWordsFromCamera;
+
 
     /**
      * The private constructor for the Data Store Singleton class
@@ -55,5 +58,21 @@ public class DataStore {
 
     public void setSearchWords(List<String> searchWords) {
         this.searchWords = searchWords;
+    }
+
+    public boolean getIsWordsearchFromCamera() {
+        return isWordsearchFromCamera;
+    }
+
+    public void setWordsearchFromCamera(boolean wordsearchFromCamera) {
+        isWordsearchFromCamera = wordsearchFromCamera;
+    }
+
+    public boolean getAreWordsFromCamera() {
+        return areWordsFromCamera;
+    }
+
+    public void setAreWordsFromCamera(boolean areWordsFromCamera) {
+        this.areWordsFromCamera = areWordsFromCamera;
     }
 }
