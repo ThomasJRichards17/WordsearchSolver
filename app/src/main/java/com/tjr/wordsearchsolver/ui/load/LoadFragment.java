@@ -30,6 +30,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ import static com.tjr.wordsearchsolver.data.RequestCodes.TAKE_WORDS_PHOTO;
 
 public class LoadFragment extends Fragment implements View.OnClickListener {
 
-    public static final String TESSDATA = "tessdata";
+    private static final String TESSDATA = "tessdata";
     private final Logger logger = LoggerFactory.getLogger(LoadFragment.class);
     private static String dataPath;
 
@@ -143,6 +145,12 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                     dataStore.setAreWordsFromCamera(true);
                     loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
                     loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                    executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            getWordsFromBitmap(TAKE_WORDS_PHOTO);
+                        }
+                    });
                 }
             }
         }
@@ -175,9 +183,9 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         String imageFileName = "Image_";
 
         if (requestCode == TAKE_WORDSEARCH_PHOTO)
-            imageFileName += "Wordsearch.jpg";
+            imageFileName += "Wordsearch.png";
         else if (requestCode == TAKE_WORDS_PHOTO)
-            imageFileName += "Words.jpg";
+            imageFileName += "Words.png";
 
         File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         return new File(storageDir, imageFileName);
@@ -231,7 +239,8 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         if (dataStore.getTrainedDataPath() == null) {
 
             File dir = new File(dataPath + "/" + TESSDATA);
-            dir.mkdirs();
+            if (!dir.exists())
+                dir.mkdirs();
             dataStore.setTrainedDataPath(dataPath + "/");
 
             // Copy trained data to hidden app folder
@@ -257,19 +266,19 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                 logger.error("Error copying trained data", e);
             }
 
-            wordFinder = new WordFinder();
+            if (wordFinder == null) wordFinder = new WordFinder();
         }
     }
 
     private void getWordsFromBitmap(int requestCode) {
-        if (requestCode == LOAD_WORDS_PHOTO) {
-            String words = null;
+        if (requestCode == LOAD_WORDS_PHOTO || requestCode == TAKE_WORDS_PHOTO) {
+            List<String> words = new ArrayList<>();
             try {
                 words = wordFinder.recogniseWords(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getSearchWordsImagePath()));
             } catch (IOException e) {
                 logger.error("Error getting words from words photo", e);
             }
-            System.out.println(words);
+            dataStore.setSearchWords(words);
         }
     }
 }
