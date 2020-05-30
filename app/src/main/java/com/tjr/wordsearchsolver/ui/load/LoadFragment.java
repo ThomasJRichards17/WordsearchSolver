@@ -3,7 +3,6 @@ package com.tjr.wordsearchsolver.ui.load;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -30,11 +29,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.concurrent.Future;
 
 import static android.app.Activity.RESULT_OK;
 import static com.tjr.wordsearchsolver.data.RequestCodes.LOAD_WORDSEARCH_PHOTO;
@@ -127,14 +126,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                 } else {
                     dataStore.setSearchWordsImagePath(selectedImageURI);
                     dataStore.setAreWordsFromCamera(false);
-                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
-                    executorService.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            getWordsFromBitmap(LOAD_WORDS_PHOTO);
-                        }
-                    });
+                    getWordsFromBitmap(LOAD_WORDS_PHOTO);
                 }
             } else if (requestCode == TAKE_WORDSEARCH_PHOTO || requestCode == TAKE_WORDS_PHOTO) {
                 if (requestCode == TAKE_WORDSEARCH_PHOTO && checkBitmapIsntEmpty(dataStore.getWordsearchImagePath())) {
@@ -145,12 +137,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                     dataStore.setAreWordsFromCamera(true);
                     loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
                     loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
-                    executorService.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            getWordsFromBitmap(TAKE_WORDS_PHOTO);
-                        }
-                    });
+                    getWordsFromBitmap(TAKE_WORDS_PHOTO);
                 }
             }
         }
@@ -215,23 +202,13 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         else if (dataStore.getSearchWordsImagePath() != null)
             loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
 
-        if (dataStore.getSearchWords() != null) {
-            String text;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                text = String.join(", ", dataStore.getSearchWords());
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                text = dataStore.getSearchWords().stream().collect(Collectors.joining(", "));
-            } else {
-                StringBuilder builder = new StringBuilder();
-                for (String word : dataStore.getSearchWords()) {
-                    builder.append(word);
-                    builder.append(", ");
-                }
-                text = builder.substring(0, builder.toString().length() - 2);
+        if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0) {
+            StringBuilder builder = new StringBuilder();
+            for (String word : dataStore.getSearchWords()) {
+                builder.append(word);
+                builder.append(", ");
             }
-
-            manualEntryText.setText(text);
+            manualEntryText.setText(builder.substring(0, builder.toString().length() - 2));
         }
     }
 
@@ -272,13 +249,35 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
     private void getWordsFromBitmap(int requestCode) {
         if (requestCode == LOAD_WORDS_PHOTO || requestCode == TAKE_WORDS_PHOTO) {
-            List<String> words = new ArrayList<>();
+            Future<List<String>> wordsFuture = null;
             try {
-                words = wordFinder.recogniseWords(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getSearchWordsImagePath()));
+                wordsFuture = wordFinder.recogniseWords(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getSearchWordsImagePath()));
+                while (!wordsFuture.isDone()) {
+
+                }
+                loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
             } catch (IOException e) {
                 logger.error("Error getting words from words photo", e);
             }
-            dataStore.setSearchWords(words);
+            if (wordsFuture != null) {
+                try {
+                    dataStore.setSearchWords(wordsFuture.get());
+                } catch (ExecutionException | InterruptedException e) {
+                    logger.error("Error setting search words", e);
+                }
+            }
+            updateDisplayedWords();
         }
+    }
+
+    private void updateDisplayedWords() {
+        StringBuilder csvBuilder = new StringBuilder();
+        for (String word : dataStore.getSearchWords()) {
+            csvBuilder.append(word);
+            csvBuilder.append(", ");
+        }
+        String csv = csvBuilder.toString().substring(0, csvBuilder.toString().length() - 2);
+        manualEntryText.setText(csv);
     }
 }
