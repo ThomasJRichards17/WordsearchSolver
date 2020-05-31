@@ -34,7 +34,7 @@ public class WordFinder {
                 return formatWords(authResult.getText());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-                return null;
+                return new ArrayList<>();
             }
         });
     }
