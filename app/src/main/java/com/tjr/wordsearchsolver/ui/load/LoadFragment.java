@@ -123,6 +123,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                     dataStore.setWordsearchFromCamera(false);
                     loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
                     loadWordsearchCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
+                    getWordsFromBitmap(LOAD_WORDSEARCH_PHOTO);
                 } else {
                     dataStore.setSearchWordsImagePath(selectedImageURI);
                     dataStore.setAreWordsFromCamera(false);
@@ -135,8 +136,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                     loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
                 } else if (checkBitmapIsntEmpty(dataStore.getSearchWordsImagePath())) {
                     dataStore.setAreWordsFromCamera(true);
-                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
                     getWordsFromBitmap(TAKE_WORDS_PHOTO);
                 }
             }
@@ -255,8 +254,13 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                 while (!wordsFuture.isDone()) {
 
                 }
-                loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
+                if (requestCode == LOAD_WORDS_PHOTO) {
+                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
+                } else {
+                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                }
             } catch (IOException e) {
                 logger.error("Error getting words from words photo", e);
             }
@@ -268,6 +272,13 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                 }
             }
             updateDisplayedWords();
+        } else if (requestCode == LOAD_WORDSEARCH_PHOTO || requestCode == TAKE_WORDSEARCH_PHOTO) {
+            Future<List<List<Character>>> wordsearchFuture = null;
+            try {
+                wordsearchFuture = wordFinder.recogniseWordsearch(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getWordsearchImagePath()));
+            } catch (IOException e) {
+                logger.error("Error getting wordsearch from wordsearch photo", e);
+            }
         }
     }
 

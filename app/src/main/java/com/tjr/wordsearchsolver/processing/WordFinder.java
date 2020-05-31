@@ -26,14 +26,24 @@ public class WordFinder {
     public Future<List<String>> recogniseWords(Bitmap bitmap) {
         return executor.submit(() -> {
             baseAPI.setImage(bitmap);
+            baseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
             String wordsFromImage = baseAPI.getUTF8Text();
             return formatWords(wordsFromImage);
         });
     }
 
+    public Future<List<List<Character>>> recogniseWordsearch(Bitmap bitmap) {
+        return executor.submit(() -> {
+            baseAPI.setImage(bitmap);
+            baseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
+            String charsFromImage = baseAPI.getUTF8Text();
+            return formatWordsearch(charsFromImage);
+        });
+    }
+
     private List<String> formatWords(String wordsFromImage) {
         ArrayList<String> words = new ArrayList<>();
-        String[] unalteredWords = wordsFromImage.split(" ");
+        String[] unalteredWords = wordsFromImage.split("[ \n]");
 
         for (String word : unalteredWords) {
             String cleanedWord = word.replaceAll("\\P{L}", "").trim();
@@ -41,6 +51,11 @@ public class WordFinder {
                 words.add(cleanedWord.toLowerCase());
         }
         return words;
+    }
+
+    private List<List<Character>> formatWordsearch(String charsFromImage) {
+        List<List<Character>> wordsearch = new ArrayList<>();
+        return wordsearch;
     }
 
 }
