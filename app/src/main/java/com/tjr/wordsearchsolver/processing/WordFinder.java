@@ -34,7 +34,22 @@ public class WordFinder {
                 return formatWords(authResult.getText());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-                return new ArrayList<>();
+                return null;
+            }
+        });
+    }
+
+    public Future<List<List<Character>>> recogniseWordsearch(Bitmap bitmap) {
+        return executor.submit(() -> {
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+            FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
+            Task<FirebaseVisionText> result = detector.processImage(image);
+            try {
+                FirebaseVisionText authResult = Tasks.await(result);
+                return formatWordsearch(authResult.getText());
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+                return null;
             }
         });
     }
@@ -53,6 +68,15 @@ public class WordFinder {
 
     private List<List<Character>> formatWordsearch(String charsFromImage) {
         List<List<Character>> wordsearch = new ArrayList<>();
+        String[] unalteredLines = charsFromImage.split("\n");
+        for (String line : unalteredLines) {
+            line = line.replaceAll("\\P{L}", "").replaceAll(" ", "").toUpperCase().trim();
+            char[] characters = line.toCharArray();
+            List<Character> chars = new ArrayList<>();
+            for (Character c : characters)
+                chars.add(c);
+            wordsearch.add(chars);
+        }
         return wordsearch;
     }
 
