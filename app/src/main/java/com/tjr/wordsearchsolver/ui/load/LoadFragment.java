@@ -274,11 +274,11 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
             updateDisplayedWords();
         } else if (requestCode == LOAD_WORDSEARCH_PHOTO || requestCode == TAKE_WORDSEARCH_PHOTO) {
             Future<List<List<Character>>> wordsearchFuture = null;
-            try {
-                wordsearchFuture = wordFinder.recogniseWordsearch(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getWordsearchImagePath()));
-            } catch (IOException e) {
-                logger.error("Error getting wordsearch from wordsearch photo", e);
-            }
+//            try {
+//                wordFinder.detectFirebase(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getWordsearchImagePath()));
+//            } catch (IOException e) {
+//                logger.error("Error getting wordsearch from wordsearch photo", e);
+//            }
         }
     }
 

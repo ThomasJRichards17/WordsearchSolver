@@ -2,42 +2,40 @@ package com.tjr.wordsearchsolver.processing;
 
 import android.graphics.Bitmap;
 
-import com.googlecode.tesseract.android.TessBaseAPI;
-import com.tjr.wordsearchsolver.data.DataStore;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.text.FirebaseVisionText;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class WordFinder {
 
-    private final TessBaseAPI baseAPI;
-
     private ExecutorService executor;
 
     public WordFinder() {
-        baseAPI = new TessBaseAPI();
-        baseAPI.init(DataStore.getDataStore().getTrainedDataPath(), "eng");
         executor = Executors.newSingleThreadExecutor();
     }
 
     public Future<List<String>> recogniseWords(Bitmap bitmap) {
         return executor.submit(() -> {
-            baseAPI.setImage(bitmap);
-            baseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
-            String wordsFromImage = baseAPI.getUTF8Text();
-            return formatWords(wordsFromImage);
-        });
-    }
-
-    public Future<List<List<Character>>> recogniseWordsearch(Bitmap bitmap) {
-        return executor.submit(() -> {
-            baseAPI.setImage(bitmap);
-            baseAPI.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO);
-            String charsFromImage = baseAPI.getUTF8Text();
-            return formatWordsearch(charsFromImage);
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+            FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
+            Task<FirebaseVisionText> result = detector.processImage(image);
+            try {
+                FirebaseVisionText authResult = Tasks.await(result);
+                return formatWords(authResult.getText());
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+                return new ArrayList<>();
+            }
         });
     }
 
