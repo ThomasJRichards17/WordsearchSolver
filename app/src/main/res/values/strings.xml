@@ -1,12 +1,14 @@
 <resources>
     <string name="app_name">Wordsearch Solver</string>
     <string name="title_load">Load</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_solve">Solve</string>
     <string name="title_notifications">Notifications</string>
     <string name="subtitle_load_wordsearch">Load Wordsearch</string>
     <string name="load_wordsearch_photo_button_text">Load From Saved Photo</string>
     <string name="load_wordsearch_camera_button_text">Load Using Camera</string>
     <string name="subtitle_load_words">Load Words</string>
-    <string name="subtitle_enter_words">Enter Words Manually</string>
+    <string name="subtitle_loaded_words">Loaded Words</string>
     <string name="words_text_entry_hint">E.g. cat, dog, hippo</string>
+    <string name="subtitle_loaded_wordsearch">Loaded Wordsearch</string>
+    <string name="wordsearch_text_entry_hint">Wordsearch grid will be displayed here once loaded</string>
 </resources>

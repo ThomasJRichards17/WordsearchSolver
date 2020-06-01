@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/solveScrollContainer"
+	android:paddingBottom="50dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+	<LinearLayout
+		android:id="@+id/containerLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+
+
+		<LinearLayout
+			android:id="@+id/linearLayoutLoadWordsearch"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:gravity="center_horizontal|top"
+			android:orientation="vertical"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent">
+
+			<TextView
+				android:id="@+id/loaded_wordsearch_heading"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center_horizontal"
+				android:text="@string/subtitle_loaded_wordsearch"
+				android:textColor="@color/black"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+			<EditText
+				android:id="@+id/loadedWordsearchText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="@string/wordsearch_text_entry_hint"
+				android:importantForAutofill="no"
+				android:inputType="textMultiLine"
+				android:scrollbars="vertical"
+				android:textSize="12sp"
+				android:typeface="monospace" />
+
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/linearLayoutLoadWords"
+        android:layout_width="match_parent"
+			android:layout_height="fill_parent"
+			android:layout_marginTop="20dp"
+			android:gravity="center_horizontal|bottom"
+			android:orientation="vertical"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toStartOf="@+id/linearLayoutLoadWordsearch"
+			app:layout_constraintTop_toTopOf="parent">
+
+			<TextView
+				android:id="@+id/loaded_words_heading"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_horizontal"
+				android:text="@string/subtitle_loaded_words"
+				android:textColor="@color/black"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+			<EditText
+				android:id="@+id/loadedWordsText"
+				android:layout_width="match_parent"
+				android:layout_height="fill_parent"
+				android:hint="@string/words_text_entry_hint"
+				android:importantForAutofill="no"
+				android:inputType="textMultiLine"
+				android:scrollbars="vertical"
+				android:textSize="12sp" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+</ScrollView>

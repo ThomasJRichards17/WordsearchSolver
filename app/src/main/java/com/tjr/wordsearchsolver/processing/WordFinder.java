@@ -19,14 +19,16 @@ import java.util.concurrent.Future;
 public class WordFinder {
 
     private ExecutorService executor;
+    private ImagePreprocessor preprocessor;
 
     public WordFinder() {
         executor = Executors.newSingleThreadExecutor();
+        preprocessor = new ImagePreprocessor();
     }
 
     public Future<List<String>> recogniseWords(Bitmap bitmap) {
         return executor.submit(() -> {
-            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(preprocessor.preprocess(bitmap));
             FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
             Task<FirebaseVisionText> result = detector.processImage(image);
             try {
@@ -72,10 +74,12 @@ public class WordFinder {
         for (String line : unalteredLines) {
             line = line.replaceAll("\\P{L}", "").replaceAll(" ", "").toUpperCase().trim();
             char[] characters = line.toCharArray();
-            List<Character> chars = new ArrayList<>();
-            for (Character c : characters)
-                chars.add(c);
-            wordsearch.add(chars);
+            if (characters.length > 1) {
+                List<Character> chars = new ArrayList<>();
+                for (Character c : characters)
+                    chars.add(c);
+                wordsearch.add(chars);
+            }
         }
         return wordsearch;
     }

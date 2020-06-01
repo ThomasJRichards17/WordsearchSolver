@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_load" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.tjr.wordsearchsolver.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_solve"
+        android:name="com.tjr.wordsearchsolver.ui.solve.SolveFragment"
+        android:label="@string/title_solve"
+        tools:layout="@layout/fragment_solve" />
 
     <fragment
         android:id="@+id/navigation_notifications"
