@@ -7,14 +7,14 @@ import java.util.List;
 
 public class DataStore {
     private static DataStore dataStore;
-    private Uri wordsearchImage;
-    private Uri searchWordsImage;
+    private String trainedDataPath;
+    private Uri wordsearchImagePath;
+    private Uri searchWordsImagePath;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
     private List<String> searchWords = new ArrayList<>();
     private boolean isWordsearchFromCamera;
     private boolean areWordsFromCamera;
-
-
+    
     /**
      * The private constructor for the Data Store Singleton class
      */
@@ -22,26 +22,26 @@ public class DataStore {
     }
 
     public static DataStore getDataStore() {
-        // instantiate a new DataStore if we don't have one yet
+        // Instantiate a new DataStore if we don't have one yet
         if (dataStore == null)
             dataStore = new DataStore();
         return dataStore;
     }
 
-    public Uri getWordsearchImage() {
-        return wordsearchImage;
+    public Uri getWordsearchImagePath() {
+        return wordsearchImagePath;
     }
 
-    public void setWordsearchImage(Uri wordsearchImage) {
-        this.wordsearchImage = wordsearchImage;
+    public void setWordsearchImagePath(Uri wordsearchImagePath) {
+        this.wordsearchImagePath = wordsearchImagePath;
     }
 
-    public Uri getSearchWordsImage() {
-        return searchWordsImage;
+    public Uri getSearchWordsImagePath() {
+        return searchWordsImagePath;
     }
 
-    public void setSearchWordsImage(Uri searchWordsImage) {
-        this.searchWordsImage = searchWordsImage;
+    public void setSearchWordsImagePath(Uri searchWordsImagePath) {
+        this.searchWordsImagePath = searchWordsImagePath;
     }
 
     public List<List<Character>> getWordsearchGrid() {
@@ -74,5 +74,13 @@ public class DataStore {
 
     public void setAreWordsFromCamera(boolean areWordsFromCamera) {
         this.areWordsFromCamera = areWordsFromCamera;
+    }
+
+    public String getTrainedDataPath() {
+        return trainedDataPath;
+    }
+
+    public void setTrainedDataPath(String trainedDataPath) {
+        this.trainedDataPath = trainedDataPath;
     }
 }
