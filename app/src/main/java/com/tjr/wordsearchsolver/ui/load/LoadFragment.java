@@ -39,8 +39,8 @@ import static com.tjr.wordsearchsolver.data.RequestCodes.TAKE_WORDS_PHOTO;
 
 public class LoadFragment extends Fragment implements View.OnClickListener {
 
-    private final Logger logger = LoggerFactory.getLogger(LoadFragment.class);
-    private final ReentrantLock lock = new ReentrantLock();
+    private Logger logger = LoggerFactory.getLogger(LoadFragment.class);
+    private ReentrantLock lock = new ReentrantLock();
 
     private DataStore dataStore;
     private WordFinder wordFinder;

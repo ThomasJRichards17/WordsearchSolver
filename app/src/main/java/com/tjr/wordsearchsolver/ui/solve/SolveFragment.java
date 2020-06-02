@@ -16,6 +16,7 @@ import com.tjr.wordsearchsolver.data.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,9 +27,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     private DataStore dataStore;
 
     private TextView wordsearchText;
-    private Button saveWordsearchButton;
     private TextView wordsText;
-    private Button saveWordsButton;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,10 +36,10 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         dataStore = DataStore.getDataStore();
 
         wordsearchText = root.findViewById(R.id.loadedWordsearchText);
-        saveWordsearchButton = root.findViewById(R.id.saveWordsearchButton);
+        Button saveWordsearchButton = root.findViewById(R.id.saveWordsearchButton);
         saveWordsearchButton.setOnClickListener(this);
         wordsText = root.findViewById(R.id.loadedWordsText);
-        saveWordsButton = root.findViewById(R.id.saveWordsButton);
+        Button saveWordsButton = root.findViewById(R.id.saveWordsButton);
         saveWordsButton.setOnClickListener(this);
 
         loadStoredValues();
@@ -86,7 +85,16 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void saveWordsearch() {
-        String wordsearchString = wordsearchText.getText().toString();
+        List<List<Character>> characters = new ArrayList<>();
+        String[] rows = wordsearchText.getText().toString().split("\n");
+        for (String row : rows) {
+            ArrayList<Character> rowAsChar = new ArrayList<>();
+            String[] rowChars = row.split(" ");
+            for (String c : rowChars)
+                rowAsChar.add(c.charAt(0));
+            characters.add(rowAsChar);
+        }
+        dataStore.setWordsearchGrid(characters);
     }
 
     private void saveWords() {

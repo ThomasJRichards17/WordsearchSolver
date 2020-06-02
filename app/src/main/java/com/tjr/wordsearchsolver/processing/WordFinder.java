@@ -18,8 +18,8 @@ import java.util.concurrent.Future;
 
 public class WordFinder {
 
-    private ExecutorService executor;
-    private ImagePreprocessor preprocessor;
+    private final ExecutorService executor;
+    private final ImagePreprocessor preprocessor;
 
     public WordFinder() {
         executor = Executors.newSingleThreadExecutor();

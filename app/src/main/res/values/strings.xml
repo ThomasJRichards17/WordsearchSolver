@@ -11,7 +11,6 @@
     <string name="words_text_entry_hint">E.g. cat, dog, hippo</string>
     <string name="subtitle_loaded_wordsearch">Loaded Wordsearch</string>
     <string name="wordsearch_text_entry_hint">Wordsearch grid will be displayed here once loaded</string>
-    <string name="save_wordsearch_button_description">Button to save wordsearch from solve screen</string>
     <string name="save_wordsearch_button">Save Wordsearch</string>
     <string name="save_words_button">Save Words</string>
 </resources>
