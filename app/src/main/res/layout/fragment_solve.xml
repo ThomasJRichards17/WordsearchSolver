@@ -44,6 +44,14 @@
 				android:textSize="12sp"
 				android:typeface="monospace" />
 
+			<Button
+				android:id="@+id/saveWordsearchButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:backgroundTint="#FFFFFF"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_wordsearch_button" />
+
 		</LinearLayout>
 
 		<LinearLayout
@@ -77,6 +85,14 @@
 				android:inputType="textMultiLine"
 				android:scrollbars="vertical"
 				android:textSize="12sp" />
+
+			<Button
+				android:id="@+id/saveWordsButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:backgroundTint="#FFFFFF"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_words_button" />
 
 		</LinearLayout>
 

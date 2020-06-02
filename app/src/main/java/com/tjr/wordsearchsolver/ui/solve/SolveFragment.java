@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,16 +16,19 @@ import com.tjr.wordsearchsolver.data.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
-public class SolveFragment extends Fragment {
+public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private final Logger logger = LoggerFactory.getLogger(SolveFragment.class);
 
     private DataStore dataStore;
 
-    private TextView loadedWordsearchText;
-    private TextView loadedWordsText;
+    private TextView wordsearchText;
+    private Button saveWordsearchButton;
+    private TextView wordsText;
+    private Button saveWordsButton;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,12 +36,28 @@ public class SolveFragment extends Fragment {
 
         dataStore = DataStore.getDataStore();
 
-        loadedWordsearchText = root.findViewById(R.id.loadedWordsearchText);
-        loadedWordsText = root.findViewById(R.id.loadedWordsText);
+        wordsearchText = root.findViewById(R.id.loadedWordsearchText);
+        saveWordsearchButton = root.findViewById(R.id.saveWordsearchButton);
+        saveWordsearchButton.setOnClickListener(this);
+        wordsText = root.findViewById(R.id.loadedWordsText);
+        saveWordsButton = root.findViewById(R.id.saveWordsButton);
+        saveWordsButton.setOnClickListener(this);
 
         loadStoredValues();
 
         return root;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.saveWordsearchButton:
+                saveWordsearch();
+                break;
+            case R.id.saveWordsButton:
+                saveWords();
+                break;
+        }
     }
 
     private void loadStoredValues() {
@@ -53,7 +73,7 @@ public class SolveFragment extends Fragment {
             for (Character c : row)
                 rowBuilder.append(c).append(" ");
             rowBuilder.append("\n");
-            loadedWordsearchText.append(rowBuilder.toString());
+            wordsearchText.append(rowBuilder.toString());
         }
     }
 
@@ -62,6 +82,14 @@ public class SolveFragment extends Fragment {
         for (String word : dataStore.getSearchWords())
             csvBuilder.append(word).append(", ");
         String csv = csvBuilder.toString().substring(0, csvBuilder.toString().length() - 2);
-        loadedWordsText.setText(csv);
+        wordsText.setText(csv);
+    }
+
+    private void saveWordsearch() {
+        String wordsearchString = wordsearchText.getText().toString();
+    }
+
+    private void saveWords() {
+        dataStore.setSearchWords(Arrays.asList(wordsText.getText().toString().split(", ")));
     }
 }
