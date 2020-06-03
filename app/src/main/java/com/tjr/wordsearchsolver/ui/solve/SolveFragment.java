@@ -1,6 +1,8 @@
 package com.tjr.wordsearchsolver.ui.solve;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,21 +15,18 @@ import androidx.fragment.app.Fragment;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SolveFragment extends Fragment implements View.OnClickListener {
 
-    private final Logger logger = LoggerFactory.getLogger(SolveFragment.class);
-
     private DataStore dataStore;
 
     private TextView wordsearchText;
+    private TextView wordsearchSavedText;
     private TextView wordsText;
+    private TextView wordsSavedText;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -36,11 +35,42 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         dataStore = DataStore.getDataStore();
 
         wordsearchText = root.findViewById(R.id.loadedWordsearchText);
+        wordsearchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                setWordsearchSavedText(false);
+            }
+        });
         Button saveWordsearchButton = root.findViewById(R.id.saveWordsearchButton);
         saveWordsearchButton.setOnClickListener(this);
+        wordsearchSavedText = root.findViewById(R.id.wordsearchSavedText);
+
         wordsText = root.findViewById(R.id.loadedWordsText);
+        wordsText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                setWordsSavedText(false);
+            }
+        });
         Button saveWordsButton = root.findViewById(R.id.saveWordsButton);
         saveWordsButton.setOnClickListener(this);
+        wordsSavedText = root.findViewById(R.id.wordsSavedText);
 
         loadStoredValues();
 
@@ -60,10 +90,19 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadStoredValues() {
-        if (dataStore.getWordsearchGrid() != null && dataStore.getWordsearchGrid().size() != 0)
+        if (dataStore.getWordsearchGrid() != null && dataStore.getWordsearchGrid().size() != 0) {
             updateDisplayedWordsearch();
-        if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0)
+            setWordsearchSavedText(true);
+        } else {
+            wordsearchSavedText.setVisibility(View.GONE);
+        }
+
+        if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0) {
             updateDisplayedWords();
+            setWordsSavedText(true);
+        } else {
+            wordsSavedText.setVisibility(View.GONE);
+        }
     }
 
     private void updateDisplayedWordsearch() {
@@ -95,9 +134,27 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             characters.add(rowAsChar);
         }
         dataStore.setWordsearchGrid(characters);
+        setWordsearchSavedText(true);
     }
 
     private void saveWords() {
         dataStore.setSearchWords(Arrays.asList(wordsText.getText().toString().split(", ")));
+        setWordsSavedText(true);
+    }
+
+    private void setWordsearchSavedText(boolean saved) {
+        wordsearchSavedText.setVisibility(View.VISIBLE);
+        if (saved)
+            wordsearchSavedText.setText(requireActivity().getResources().getString(R.string.wordsearch_saved_text));
+        else
+            wordsearchSavedText.setText(requireActivity().getResources().getString(R.string.wordsearch_unsaved_text));
+    }
+
+    private void setWordsSavedText(boolean saved) {
+        wordsSavedText.setVisibility(View.VISIBLE);
+        if (saved)
+            wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_saved_text));
+        else
+            wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_unsaved_text));
     }
 }

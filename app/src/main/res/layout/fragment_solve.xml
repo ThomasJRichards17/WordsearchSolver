@@ -44,7 +44,7 @@
 				android:textSize="12sp"
 				android:typeface="monospace" />
 
-			<Button
+            <Button
 				android:id="@+id/saveWordsearchButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -52,7 +52,15 @@
 				android:drawableStart="@drawable/ic_save"
 				android:text="@string/save_wordsearch_button" />
 
-		</LinearLayout>
+            <TextView
+                android:id="@+id/wordsearchSavedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wordsearch_saved_text"
+                android:textColor="#000000"
+                android:visibility="visible" />
+
+        </LinearLayout>
 
 		<LinearLayout
 			android:id="@+id/linearLayoutLoadWords"
@@ -65,7 +73,7 @@
 			app:layout_constraintStart_toStartOf="@+id/linearLayoutLoadWordsearch"
 			app:layout_constraintTop_toTopOf="parent">
 
-			<TextView
+            <TextView
 				android:id="@+id/loaded_words_heading"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -94,7 +102,15 @@
 				android:drawableStart="@drawable/ic_save"
 				android:text="@string/save_words_button" />
 
-		</LinearLayout>
+            <TextView
+                android:id="@+id/wordsSavedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/words_saved_text"
+                android:textColor="#000000"
+                android:visibility="visible" />
+
+        </LinearLayout>
 
 	</LinearLayout>
 </ScrollView>
