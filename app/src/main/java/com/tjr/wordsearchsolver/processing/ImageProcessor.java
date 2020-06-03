@@ -16,12 +16,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class WordFinder {
+public class ImageProcessor {
 
     private final ExecutorService executor;
     private final ImagePreprocessor preprocessor;
 
-    public WordFinder() {
+    public ImageProcessor() {
         executor = Executors.newSingleThreadExecutor();
         preprocessor = new ImagePreprocessor();
     }

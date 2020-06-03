@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
-import com.tjr.wordsearchsolver.processing.WordFinder;
+import com.tjr.wordsearchsolver.processing.ImageProcessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
     private ReentrantLock lock = new ReentrantLock();
 
     private DataStore dataStore;
-    private WordFinder wordFinder;
+    private ImageProcessor wordFinder;
 
     private Button loadWordsearchCameraButton;
     private Button loadWordsearchPhotoButton;
@@ -70,7 +70,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
         Executors.newSingleThreadExecutor().execute(this::loadStoredValues);
 
-        wordFinder = new WordFinder();
+        wordFinder = new ImageProcessor();
 
         return root;
     }
