@@ -13,8 +13,8 @@
 		android:orientation="vertical">
 
 
-		<LinearLayout
-			android:id="@+id/linearLayoutLoadWordsearch"
+        <LinearLayout
+            android:id="@+id/linearLayoutWordsearch"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="10dp"
@@ -63,14 +63,14 @@
         </LinearLayout>
 
 		<LinearLayout
-			android:id="@+id/linearLayoutLoadWords"
-        android:layout_width="match_parent"
+            android:id="@+id/linearLayoutWords"
+            android:layout_width="match_parent"
 			android:layout_height="fill_parent"
 			android:layout_marginTop="20dp"
 			android:gravity="center_horizontal|bottom"
 			android:orientation="vertical"
 			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintStart_toStartOf="@+id/linearLayoutLoadWordsearch"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutWordsearch"
 			app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -112,5 +112,28 @@
 
         </LinearLayout>
 
-	</LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayoutSolve"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutWords"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/solve_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="@string/solve_heading"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
 </ScrollView>

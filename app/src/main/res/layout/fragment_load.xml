@@ -15,7 +15,7 @@
 
 
         <LinearLayout
-            android:id="@+id/linearLayoutLoadWordsearch"
+            android:id="@+id/linearLayoutWordsearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal|top"
@@ -53,14 +53,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayoutLoadWords"
+            android:id="@+id/linearLayoutWords"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_marginTop="20dp"
             android:gravity="center_horizontal|bottom"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/linearLayoutLoadWordsearch"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutWordsearch"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView

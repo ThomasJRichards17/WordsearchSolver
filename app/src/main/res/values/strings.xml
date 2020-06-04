@@ -17,4 +17,5 @@
     <string name="wordsearch_unsaved_text">Latest wordsearch NOT saved!</string>
     <string name="words_saved_text">Latest words list saved!</string>
     <string name="words_unsaved_text">Latest words list NOT saved!</string>
+    <string name="solve_heading">Solve Wordsearch</string>
 </resources>
