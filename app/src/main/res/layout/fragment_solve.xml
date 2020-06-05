@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:id="@+id/solveScrollContainer"
-	android:paddingBottom="50dp"
+    android:id="@+id/solveScrollContainer"
+    android:paddingBottom="50dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -48,7 +48,6 @@
 				android:id="@+id/saveWordsearchButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:backgroundTint="#FFFFFF"
 				android:drawableStart="@drawable/ic_save"
 				android:text="@string/save_wordsearch_button" />
 
@@ -98,7 +97,6 @@
 				android:id="@+id/saveWordsButton"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:backgroundTint="#FFFFFF"
 				android:drawableStart="@drawable/ic_save"
 				android:text="@string/save_words_button" />
 
@@ -133,6 +131,24 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/solveTipText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/solve_tip_text"
+                android:textColor="#000000" />
+
+            <Button
+                android:id="@+id/solveWordsearchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:drawableStart="@drawable/ic_words"
+                android:text="@string/solve_button_text" />
         </LinearLayout>
 
     </LinearLayout>

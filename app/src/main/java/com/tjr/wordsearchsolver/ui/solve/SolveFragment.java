@@ -12,22 +12,30 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
+import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SolveFragment extends Fragment implements View.OnClickListener {
 
+    private ReentrantLock lock = new ReentrantLock();
+
     private DataStore dataStore;
+    private WordsearchProcessor wordsearchProcessor;
 
     private TextView wordsearchText;
     private TextView wordsearchSavedText;
     private TextView wordsText;
     private TextView wordsSavedText;
 
+    private boolean wordsearchSaved;
+    private boolean wordsSaved;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_solve, container, false);
@@ -47,6 +55,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable s) {
                 setWordsearchSavedText(false);
+                wordsearchSaved = false;
             }
         });
         Button saveWordsearchButton = root.findViewById(R.id.saveWordsearchButton);
@@ -66,11 +75,17 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable s) {
                 setWordsSavedText(false);
+                wordsSaved = false;
             }
         });
         Button saveWordsButton = root.findViewById(R.id.saveWordsButton);
         saveWordsButton.setOnClickListener(this);
         wordsSavedText = root.findViewById(R.id.wordsSavedText);
+
+        Button solveButton = root.findViewById(R.id.solveWordsearchButton);
+        solveButton.setOnClickListener(this);
+
+        wordsearchProcessor = new WordsearchProcessor();
 
         loadStoredValues();
 
@@ -86,6 +101,9 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             case R.id.saveWordsButton:
                 saveWords();
                 break;
+            case R.id.solveWordsearchButton:
+                solveWordsearch();
+                break;
         }
     }
 
@@ -93,15 +111,19 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         if (dataStore.getWordsearchGrid() != null && dataStore.getWordsearchGrid().size() != 0) {
             updateDisplayedWordsearch();
             setWordsearchSavedText(true);
+            wordsearchSaved = true;
         } else {
             wordsearchSavedText.setVisibility(View.GONE);
+            wordsearchSaved = false;
         }
 
         if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0) {
             updateDisplayedWords();
             setWordsSavedText(true);
+            wordsSaved = true;
         } else {
             wordsSavedText.setVisibility(View.GONE);
+            wordsSaved = false;
         }
     }
 
@@ -124,22 +146,28 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void saveWordsearch() {
-        List<List<Character>> characters = new ArrayList<>();
-        String[] rows = wordsearchText.getText().toString().split("\n");
-        for (String row : rows) {
-            ArrayList<Character> rowAsChar = new ArrayList<>();
-            String[] rowChars = row.split(" ");
-            for (String c : rowChars)
-                rowAsChar.add(c.charAt(0));
-            characters.add(rowAsChar);
+        if (!wordsearchText.getText().toString().isEmpty()) {
+            List<List<Character>> characters = new ArrayList<>();
+            String[] rows = wordsearchText.getText().toString().split("\n");
+            for (String row : rows) {
+                ArrayList<Character> rowAsChar = new ArrayList<>();
+                String[] rowChars = row.split(" ");
+                for (String c : rowChars)
+                    rowAsChar.add(c.charAt(0));
+                characters.add(rowAsChar);
+            }
+            dataStore.setWordsearchGrid(characters);
+            setWordsearchSavedText(true);
+            wordsearchSaved = true;
         }
-        dataStore.setWordsearchGrid(characters);
-        setWordsearchSavedText(true);
     }
 
     private void saveWords() {
-        dataStore.setSearchWords(Arrays.asList(wordsText.getText().toString().split(", ")));
-        setWordsSavedText(true);
+        if (!wordsText.getText().toString().isEmpty()) {
+            dataStore.setSearchWords(Arrays.asList(wordsText.getText().toString().split(", ")));
+            setWordsSavedText(true);
+            wordsSaved = true;
+        }
     }
 
     private void setWordsearchSavedText(boolean saved) {
@@ -156,5 +184,29 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_saved_text));
         else
             wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_unsaved_text));
+    }
+
+    private void solveWordsearch() {
+        if (wordsearchSaved && wordsSaved) {
+            char[][] board = new char[dataStore.getWordsearchGrid().size()][];
+
+            int i = 0;
+            for (List<Character> list : dataStore.getWordsearchGrid()) {
+                char[] array = new char[list.size()];
+                for (int j = 0; j < list.size(); j++)
+                    array[j] = Character.toLowerCase(list.get(j));
+                board[i++] = array;
+            }
+
+            List<String> searchWords = dataStore.getSearchWords();
+            String[] words = new String[searchWords.size()];
+            for (i = 0; i < searchWords.size(); i++)
+                words[i] = searchWords.get(i).toLowerCase();
+
+            wordsearchProcessor.findWords(board, words);
+        } else {
+            Snackbar mustBeSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), requireActivity().getResources().getString(R.string.must_be_saved_text), Snackbar.LENGTH_SHORT);
+            mustBeSaved.show();
+        }
     }
 }

@@ -15,7 +15,10 @@
     <string name="save_words_button">Save Words</string>
     <string name="wordsearch_saved_text">Latest wordsearch saved!</string>
     <string name="wordsearch_unsaved_text">Latest wordsearch NOT saved!</string>
-    <string name="words_saved_text">Latest words list saved!</string>
-    <string name="words_unsaved_text">Latest words list NOT saved!</string>
+    <string name="words_saved_text">Latest word list saved!</string>
+    <string name="words_unsaved_text">Latest word list NOT saved!</string>
     <string name="solve_heading">Solve Wordsearch</string>
+    <string name="solve_tip_text">Make sure the wordsearch and word list are correct and saved before solving!</string>
+    <string name="solve_button_text">Solve Wordsearch</string>
+    <string name="must_be_saved_text">Wordsearch and word list must be saved before solving!</string>
 </resources>
