@@ -7,7 +7,6 @@ import java.util.List;
 
 public class DataStore {
     private static DataStore dataStore;
-    private String trainedDataPath;
     private Uri wordsearchImagePath;
     private Uri searchWordsImagePath;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
@@ -74,13 +73,5 @@ public class DataStore {
 
     public void setAreWordsFromCamera(boolean areWordsFromCamera) {
         this.areWordsFromCamera = areWordsFromCamera;
-    }
-
-    public String getTrainedDataPath() {
-        return trainedDataPath;
-    }
-
-    public void setTrainedDataPath(String trainedDataPath) {
-        this.trainedDataPath = trainedDataPath;
     }
 }

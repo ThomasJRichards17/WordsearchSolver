@@ -15,10 +15,11 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
+import com.tjr.wordsearchsolver.data.FoundWord;
 import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -164,7 +165,10 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private void saveWords() {
         if (!wordsText.getText().toString().isEmpty()) {
-            dataStore.setSearchWords(Arrays.asList(wordsText.getText().toString().split(", ")));
+            String[] splitWords = wordsText.getText().toString().split(", ");
+            List<String> words = new ArrayList<>();
+            Collections.addAll(words, splitWords);
+            dataStore.setSearchWords(words);
             setWordsSavedText(true);
             wordsSaved = true;
         }
@@ -198,12 +202,11 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 board[i++] = array;
             }
 
-            List<String> searchWords = dataStore.getSearchWords();
-            String[] words = new String[searchWords.size()];
-            for (i = 0; i < searchWords.size(); i++)
-                words[i] = searchWords.get(i).toLowerCase();
+            List<FoundWord> foundWords = wordsearchProcessor.findWords(board, dataStore.getSearchWords());
 
-            wordsearchProcessor.findWords(board, words);
+            for (FoundWord foundWord : foundWords)
+                System.out.println(foundWord.toString());
+
         } else {
             Snackbar mustBeSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), requireActivity().getResources().getString(R.string.must_be_saved_text), Snackbar.LENGTH_SHORT);
             mustBeSaved.show();
