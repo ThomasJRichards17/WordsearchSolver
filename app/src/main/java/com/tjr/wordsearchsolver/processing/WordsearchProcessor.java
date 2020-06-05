@@ -8,30 +8,58 @@ import com.tjr.wordsearchsolver.data.Trie;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class WordsearchProcessor {
 
-    List<FoundWord> result = new ArrayList<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public List<FoundWord> findWords(char[][] board, List<String> words) {
+    private List<FoundWord> result;
 
-        int m = board.length;
-        int n = board[0].length;
+    public Future<List<FoundWord>> findWords(char[][] board, List<String> words) {
+        return executor.submit(() -> {
+            result = new ArrayList<>();
 
-        Trie trie = buildTrie(words);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++)
-                dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.HORIZONTAL);
-        }
+            int m = board.length;
+            int n = board[0].length;
 
-        removeFoundWords(words, result);
-        trie = buildTrie(words);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++)
-                dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.VERTICAL);
-        }
+            Trie trie = buildTrie(words);
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++)
+                    dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.HORIZONTAL);
+            }
 
-        return result;
+            removeFoundWords(words, result);
+            if (!words.isEmpty()) {
+                trie = buildTrie(words);
+                for (int i = 0; i < m; i++) {
+                    for (int j = 0; j < n; j++)
+                        dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.VERTICAL);
+                }
+            }
+
+            removeFoundWords(words, result);
+            if (!words.isEmpty()) {
+                trie = buildTrie(words);
+                for (int i = 0; i < m; i++) {
+                    for (int j = 0; j < n; j++)
+                        dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.DIAGONAL_TL_BR);
+                }
+            }
+
+            removeFoundWords(words, result);
+            if (!words.isEmpty()) {
+                trie = buildTrie(words);
+                for (int i = 0; i < m; i++) {
+                    for (int j = 0; j < n; j++)
+                        dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.DIAGONAL_TR_BL);
+                }
+            }
+
+            return result;
+        });
     }
 
     private void dfs(char[][] board, boolean[][] visited, String str, int i, int j, List<Coordinate> coordinates, Trie trie, SearchDirection direction) {
@@ -70,6 +98,12 @@ public class WordsearchProcessor {
         } else if (direction.equals(SearchDirection.HORIZONTAL)) {
             dfs(board, visited, str, i, j - 1, coordinates, trie, direction);
             dfs(board, visited, str, i, j + 1, coordinates, trie, direction);
+        } else if (direction.equals(SearchDirection.DIAGONAL_TL_BR)) {
+            dfs(board, visited, str, i - 1, j - 1, coordinates, trie, direction);
+            dfs(board, visited, str, i + 1, j + 1, coordinates, trie, direction);
+        } else {
+            dfs(board, visited, str, i - 1, j + 1, coordinates, trie, direction);
+            dfs(board, visited, str, i + 1, j - 1, coordinates, trie, direction);
         }
         visited[i][j] = false;
 

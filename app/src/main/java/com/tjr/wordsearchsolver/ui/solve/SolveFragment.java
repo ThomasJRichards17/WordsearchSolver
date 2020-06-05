@@ -1,12 +1,16 @@
 package com.tjr.wordsearchsolver.ui.solve;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,15 +22,21 @@ import com.tjr.wordsearchsolver.data.DataStore;
 import com.tjr.wordsearchsolver.data.FoundWord;
 import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class SolveFragment extends Fragment implements View.OnClickListener {
 
-    private ReentrantLock lock = new ReentrantLock();
+    private Logger logger = LoggerFactory.getLogger(SolveFragment.class);
 
+    private ReentrantLock lock = new ReentrantLock();
     private DataStore dataStore;
     private WordsearchProcessor wordsearchProcessor;
 
@@ -35,6 +45,8 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     private TextView wordsText;
     private TextView wordsSavedText;
 
+    private TableLayout solvedWordsearchGrid;
+
     private boolean wordsearchSaved;
     private boolean wordsSaved;
 
@@ -42,6 +54,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         View root = inflater.inflate(R.layout.fragment_solve, container, false);
 
         dataStore = DataStore.getDataStore();
+        wordsearchProcessor = new WordsearchProcessor();
 
         wordsearchText = root.findViewById(R.id.loadedWordsearchText);
         wordsearchText.addTextChangedListener(new TextWatcher() {
@@ -86,7 +99,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         Button solveButton = root.findViewById(R.id.solveWordsearchButton);
         solveButton.setOnClickListener(this);
 
-        wordsearchProcessor = new WordsearchProcessor();
+        solvedWordsearchGrid = root.findViewById(R.id.solvedWordsearchGrid);
 
         loadStoredValues();
 
@@ -202,14 +215,47 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 board[i++] = array;
             }
 
-            List<FoundWord> foundWords = wordsearchProcessor.findWords(board, dataStore.getSearchWords());
+            Future<List<FoundWord>> foundWordsFuture = null;
 
-            for (FoundWord foundWord : foundWords)
-                System.out.println(foundWord.toString());
-
+            lock.lock();
+            try {
+                foundWordsFuture = wordsearchProcessor.findWords(board, dataStore.getSearchWords());
+            } finally {
+                lock.unlock();
+                if (foundWordsFuture != null) {
+                    try {
+                        String s = " ";
+                        for (FoundWord foundWord : foundWordsFuture.get())
+                            System.out.println(foundWord.toString() + "\n");
+                        drawSolvedWordsearchGrid();
+                    } catch (ExecutionException | InterruptedException e) {
+                        logger.error("Error getting found words", e);
+                    }
+                }
+            }
         } else {
             Snackbar mustBeSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), requireActivity().getResources().getString(R.string.must_be_saved_text), Snackbar.LENGTH_SHORT);
             mustBeSaved.show();
         }
+    }
+
+    private void drawSolvedWordsearchGrid() {
+        for (int i = 0; i < dataStore.getWordsearchGrid().size(); i++)
+            solvedWordsearchGrid.addView(buildEmptyRow(dataStore.getWordsearchGrid().get(i)));
+    }
+
+    private TableRow buildEmptyRow(List<Character> chars) {
+        TableRow row = new TableRow(requireActivity().getApplicationContext());
+        for (int i = 0; i < dataStore.getWordsearchGrid().get(0).size(); i++) {
+            TextView text = new TextView(requireActivity().getApplicationContext());
+            text.setText(String.valueOf(chars.get(i)));
+            text.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f));
+            text.setBackground(requireActivity().getDrawable(R.drawable.border));
+            text.setSingleLine();
+            text.setTextColor(Color.BLACK);
+            text.setGravity(Gravity.CENTER);
+            row.addView(text);
+        }
+        return row;
     }
 }

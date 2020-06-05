@@ -50,10 +50,12 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
     private Button loadWordsCameraButton;
     private Button loadWordsPhotoButton;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_load, container, false);
 
         dataStore = DataStore.getDataStore();
+        wordFinder = new ImageProcessor();
 
         // Set button listeners
         loadWordsearchCameraButton = root.findViewById(R.id.button_load_wordsearch_camera);
@@ -69,8 +71,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         loadWordsPhotoButton.setOnClickListener(this);
 
         Executors.newSingleThreadExecutor().execute(this::loadStoredValues);
-
-        wordFinder = new ImageProcessor();
 
         return root;
     }
