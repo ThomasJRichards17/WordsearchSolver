@@ -1,5 +1,6 @@
 package com.tjr.wordsearchsolver.processing;
 
+import com.tjr.wordsearchsolver.data.SearchResponse;
 import com.tjr.wordsearchsolver.data.Trie;
 
 import java.util.ArrayList;
@@ -10,15 +11,15 @@ import java.util.Set;
 public class WordsearchProcessor {
     private Set<String> result = new HashSet<>();
 
+    List<Integer> xs = new ArrayList<>();
+    List<Integer> ys = new ArrayList<>();
+
     public List<String> findWords(char[][] board, String[] words) {
 
         Trie trie = new Trie();
         for (String word : words) {
             trie.insert(word);
         }
-
-        List<Integer> xs = new ArrayList<>();
-        List<Integer> ys = new ArrayList<>();
 
         int m = board.length;
         int n = board[0].length;
@@ -60,13 +61,21 @@ public class WordsearchProcessor {
             return;
         }
 
-        if (trie.search(str)) {
+        SearchResponse searchResponse = trie.search(str);
+        if (searchResponse == SearchResponse.FOUND) {
             result.add(str);
+            this.xs.add(xs.get(0));
+            this.xs.add(xs.get(xs.size() - 1));
+            this.ys.add(ys.get(0));
+            this.ys.add(ys.get(ys.size() - 1));
 
             for (char ignored : str.toCharArray()) {
                 xs.remove(xs.size() - 1);
                 ys.remove(ys.size() - 1);
             }
+        } else if (searchResponse.equals(SearchResponse.INCORRECT)) {
+            xs.remove(xs.size() - 1);
+            ys.remove(ys.size() - 1);
         }
 
         visited[i][j] = true;
@@ -75,5 +84,10 @@ public class WordsearchProcessor {
         dfs(board, visited, str, i, j - 1, xs, ys, trie);
         dfs(board, visited, str, i, j + 1, xs, ys, trie);
         visited[i][j] = false;
+
+        if (xs.size() > 0)
+            xs.remove(xs.size() - 1);
+        if (ys.size() > 0)
+            ys.remove(ys.size() - 1);
     }
 }

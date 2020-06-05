@@ -13,14 +13,14 @@ public class Trie {
         node.item = word;
     }
 
-    public boolean search(String word) {
+    public SearchResponse search(String word) {
         TrieNode node = root;
         for (char c : word.toCharArray()) {
             if (node.children[c - 'a'] == null)
-                return false;
+                return SearchResponse.INCORRECT;
             node = node.children[c - 'a'];
         }
-        return node.item.equals(word);
+        return node.item.equals(word) ? SearchResponse.FOUND : SearchResponse.INCOMPLETE;
     }
 
     public boolean startsWith(String prefix) {
@@ -38,3 +38,4 @@ class TrieNode {
     TrieNode[] children = new TrieNode[26];
     String item = "";
 }
+
