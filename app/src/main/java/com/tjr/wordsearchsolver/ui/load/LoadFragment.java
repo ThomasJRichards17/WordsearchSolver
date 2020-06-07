@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -70,7 +69,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         loadWordsPhotoButton = root.findViewById(R.id.button_load_words_photo);
         loadWordsPhotoButton.setOnClickListener(this);
 
-        Executors.newSingleThreadExecutor().execute(this::loadStoredValues);
+        loadStoredValues();
 
         return root;
     }

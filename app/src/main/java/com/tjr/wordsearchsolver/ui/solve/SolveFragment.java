@@ -123,13 +123,16 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadStoredValues() {
+        boolean hasGrid;
         if (dataStore.getWordsearchGrid() != null && dataStore.getWordsearchGrid().size() != 0) {
             updateDisplayedWordsearch();
             setWordsearchSavedText(true);
             wordsearchSaved = true;
+            hasGrid = true;
         } else {
             wordsearchSavedText.setVisibility(View.GONE);
             wordsearchSaved = false;
+            hasGrid = false;
         }
 
         if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0) {
@@ -139,6 +142,13 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         } else {
             wordsSavedText.setVisibility(View.GONE);
             wordsSaved = false;
+        }
+
+        solvedWordsearchGrid.removeAllViews();
+
+        if (hasGrid && dataStore.getFoundWords() != null && dataStore.getFoundWords().size() != 0) {
+            drawSolvedWordsearchGrid();
+            highlightFoundWords(dataStore.getFoundWords());
         }
     }
 
@@ -217,16 +227,15 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             }
 
             Future<List<FoundWord>> foundWordsFuture = null;
-
             lock.lock();
             try {
-                foundWordsFuture = wordsearchProcessor.findWords(board, dataStore.getSearchWords());
+                foundWordsFuture = wordsearchProcessor.findWords(board, new ArrayList<>(dataStore.getSearchWords()));
             } finally {
                 lock.unlock();
                 if (foundWordsFuture != null) {
                     try {
-                        for (FoundWord foundWord : foundWordsFuture.get())
-                            System.out.println(foundWord.toString() + "\n");
+                        dataStore.setFoundWords(foundWordsFuture.get());
+                        solvedWordsearchGrid.removeAllViews();
                         drawSolvedWordsearchGrid();
                         highlightFoundWords(foundWordsFuture.get());
                     } catch (ExecutionException | InterruptedException e) {

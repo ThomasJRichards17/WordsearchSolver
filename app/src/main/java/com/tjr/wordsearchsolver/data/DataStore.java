@@ -11,6 +11,7 @@ public class DataStore {
     private Uri searchWordsImagePath;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
     private List<String> searchWords = new ArrayList<>();
+    private List<FoundWord> foundWords = new ArrayList<>();
     private boolean isWordsearchFromCamera;
     private boolean areWordsFromCamera;
     
@@ -33,6 +34,7 @@ public class DataStore {
 
     public void setWordsearchImagePath(Uri wordsearchImagePath) {
         this.wordsearchImagePath = wordsearchImagePath;
+        foundWords.clear();
     }
 
     public Uri getSearchWordsImagePath() {
@@ -73,5 +75,13 @@ public class DataStore {
 
     public void setAreWordsFromCamera(boolean areWordsFromCamera) {
         this.areWordsFromCamera = areWordsFromCamera;
+    }
+
+    public List<FoundWord> getFoundWords() {
+        return foundWords;
+    }
+
+    public void setFoundWords(List<FoundWord> foundWords) {
+        this.foundWords = foundWords;
     }
 }
