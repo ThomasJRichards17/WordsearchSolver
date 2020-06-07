@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.tjr.wordsearchsolver.R;
+import com.tjr.wordsearchsolver.data.Coordinate;
 import com.tjr.wordsearchsolver.data.DataStore;
 import com.tjr.wordsearchsolver.data.FoundWord;
 import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
@@ -224,10 +225,10 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 lock.unlock();
                 if (foundWordsFuture != null) {
                     try {
-                        String s = " ";
                         for (FoundWord foundWord : foundWordsFuture.get())
                             System.out.println(foundWord.toString() + "\n");
                         drawSolvedWordsearchGrid();
+                        highlightFoundWords(foundWordsFuture.get());
                     } catch (ExecutionException | InterruptedException e) {
                         logger.error("Error getting found words", e);
                     }
@@ -250,12 +251,68 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             TextView text = new TextView(requireActivity().getApplicationContext());
             text.setText(String.valueOf(chars.get(i)));
             text.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f));
-            text.setBackground(requireActivity().getDrawable(R.drawable.border));
             text.setSingleLine();
             text.setTextColor(Color.BLACK);
             text.setGravity(Gravity.CENTER);
             row.addView(text);
         }
         return row;
+    }
+
+    private void highlightFoundWords(List<FoundWord> foundWords) {
+        List<Coordinate> coordinates = new ArrayList<>();
+        for (FoundWord foundWord : foundWords)
+            coordinates.addAll(getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
+        for (Coordinate coordinate : coordinates) {
+            TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
+            TextView text = (TextView) row.getChildAt(coordinate.y);
+            text.setBackgroundColor(Color.GREEN);
+        }
+    }
+
+    private List<Coordinate> getCoordinatesBetweenPoints(Coordinate start, Coordinate end) {
+        List<Coordinate> coordinates = new ArrayList<>();
+
+        int startX = start.x;
+        int endX = end.x;
+        int startY = start.y;
+        int endY = end.y;
+
+        if (startX > endX) {
+            int diff = startX - endX;
+            if (startY > endY) {
+                for (int i = 0; i <= diff; i++)
+                    coordinates.add(new Coordinate(startX - i, startY - i));
+            } else if (endY > startY) {
+                for (int i = 0; i <= diff; i++)
+                    coordinates.add(new Coordinate(startX - i, startY + i));
+            } else {
+                for (int i = startX; i >= endX; i--)
+                    coordinates.add(new Coordinate(i, startY));
+            }
+        } else if (startX < endX) {
+            int diff = endX - startX;
+            if (startY > endY) {
+                for (int i = 0; i <= diff; i++)
+                    coordinates.add(new Coordinate(startX + i, startY - i));
+            } else if (endY > startY) {
+                for (int i = 0; i <= diff; i++)
+                    coordinates.add(new Coordinate(startX + i, startY + i));
+            } else {
+                for (int i = startX; i <= endX; i++)
+                    coordinates.add(new Coordinate(i, startY));
+            }
+        } else {
+            if (startY > endY) {
+                for (int i = endY; i <= startY; i++)
+                    coordinates.add(new Coordinate(startX, i));
+            } else if (endY > startY) {
+                for (int i = startY; i <= endY; i++)
+                    coordinates.add(new Coordinate(startX, i));
+            } else {
+                coordinates.add(new Coordinate(startX, startY));
+            }
+        }
+        return coordinates;
     }
 }
