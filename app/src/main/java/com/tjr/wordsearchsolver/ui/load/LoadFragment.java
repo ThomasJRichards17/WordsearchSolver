@@ -2,6 +2,7 @@ package com.tjr.wordsearchsolver.ui.load;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +17,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
 import com.tjr.wordsearchsolver.processing.ImageProcessor;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -48,7 +51,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
     private Button loadWordsearchPhotoButton;
     private Button loadWordsCameraButton;
     private Button loadWordsPhotoButton;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_load, container, false);
@@ -94,6 +96,8 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        long startTime = System.currentTimeMillis();
+        long endTime;
         if (resultCode == RESULT_OK) {
             if (requestCode == LOAD_WORDSEARCH_PHOTO.code || requestCode == LOAD_WORDS_PHOTO.code) {
                 Uri selectedImageURI = data.getData();
@@ -115,6 +119,21 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                     getWordsFromBitmap(TAKE_WORDS_PHOTO.code);
                 }
             }
+            endTime = System.currentTimeMillis();
+            Snackbar fromImage;
+            if (requestCode == LOAD_WORDSEARCH_PHOTO.code || requestCode == TAKE_WORDSEARCH_PHOTO.code) {
+                fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), MessageFormat.format("Wordsearch loaded from image in {0} seconds",
+                        ((double) (endTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+            } else {
+                fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), MessageFormat.format("Words loaded from image in {0} seconds",
+                        ((double) (endTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+            }
+            fromImage.setBackgroundTint(Color.parseColor("#228B22"));
+            fromImage.show();
+        } else {
+            Snackbar fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), "Failed to load text from image - please try again!", Snackbar.LENGTH_SHORT);
+            fromImage.setBackgroundTint(Color.parseColor("#B22222"));
+            fromImage.show();
         }
     }
 

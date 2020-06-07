@@ -26,6 +26,7 @@ import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -215,6 +216,8 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void solveWordsearch() {
+        long startTime = System.currentTimeMillis();
+        long stopTime = 0;
         if (wordsearchSaved && wordsSaved) {
             char[][] board = new char[dataStore.getWordsearchGrid().size()][];
 
@@ -238,6 +241,12 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                         solvedWordsearchGrid.removeAllViews();
                         drawSolvedWordsearchGrid();
                         highlightFoundWords(foundWordsFuture.get());
+                        stopTime = System.currentTimeMillis();
+                        Snackbar wordsearchSolved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve),
+                                MessageFormat.format("{0}/{1} words were found in {2} seconds", foundWordsFuture.get().size(),
+                                        dataStore.getSearchWords().size(), ((double) (stopTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+                        wordsearchSolved.setBackgroundTint(Color.parseColor("#228B22"));
+                        wordsearchSolved.show();
                     } catch (ExecutionException | InterruptedException e) {
                         logger.error("Error getting found words", e);
                     }
