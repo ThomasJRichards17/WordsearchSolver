@@ -130,10 +130,6 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
             }
             fromImage.setBackgroundTint(Color.parseColor("#228B22"));
             fromImage.show();
-        } else {
-            Snackbar fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), "Failed to load text from image - please try again!", Snackbar.LENGTH_SHORT);
-            fromImage.setBackgroundTint(Color.parseColor("#B22222"));
-            fromImage.show();
         }
     }
 

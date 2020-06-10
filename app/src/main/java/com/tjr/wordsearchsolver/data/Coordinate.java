@@ -18,6 +18,19 @@ public class Coordinate {
     @NonNull
     @Override
     public String toString() {
-        return String.format("(%d, %d)", y, x);
+        return String.format("(%d, %d)", y + 1, x + 1);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + x;
+        hash = 31 * hash + y;
+        return hash;
+    }
+
+
+    public boolean equals(Coordinate coordinate) {
+        return this.x == coordinate.x && this.y == coordinate.y;
     }
 }

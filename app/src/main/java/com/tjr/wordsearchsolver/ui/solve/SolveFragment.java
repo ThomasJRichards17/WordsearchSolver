@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,6 +49,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     private TextView wordsearchSavedText;
     private TextView wordsText;
     private TextView wordsSavedText;
+    private TextView foundWordsText;
 
     private TableLayout solvedWordsearchGrid;
 
@@ -102,6 +106,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         solveButton.setOnClickListener(this);
 
         solvedWordsearchGrid = root.findViewById(R.id.solvedWordsearchGrid);
+        foundWordsText = root.findViewById(R.id.solvedWordsText);
 
         loadStoredValues();
 
@@ -150,6 +155,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         if (hasGrid && dataStore.getFoundWords() != null && dataStore.getFoundWords().size() != 0) {
             drawSolvedWordsearchGrid();
             highlightFoundWords(dataStore.getFoundWords());
+            updateFoundWordsText();
         }
     }
 
@@ -217,7 +223,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private void solveWordsearch() {
         long startTime = System.currentTimeMillis();
-        long stopTime = 0;
+        long stopTime;
         if (wordsearchSaved && wordsSaved) {
             char[][] board = new char[dataStore.getWordsearchGrid().size()][];
 
@@ -243,10 +249,11 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                         highlightFoundWords(foundWordsFuture.get());
                         stopTime = System.currentTimeMillis();
                         Snackbar wordsearchSolved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve),
-                                MessageFormat.format("{0}/{1} words were found in {2} seconds", foundWordsFuture.get().size(),
+                                MessageFormat.format("{0}/{1} words were found in {2} seconds - scroll down to view the solutions", new HashSet<>(foundWordsFuture.get()).size(),
                                         dataStore.getSearchWords().size(), ((double) (stopTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
                         wordsearchSolved.setBackgroundTint(Color.parseColor("#228B22"));
                         wordsearchSolved.show();
+                        updateFoundWordsText();
                     } catch (ExecutionException | InterruptedException e) {
                         logger.error("Error getting found words", e);
                     }
@@ -278,13 +285,34 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void highlightFoundWords(List<FoundWord> foundWords) {
-        List<Coordinate> coordinates = new ArrayList<>();
+        int colour = 0;
+        boolean colourFound = false;
+        HashMap<Coordinate, Integer> colourMapping = new HashMap<>();
+        List<List<Coordinate>> coordinatesLists = new ArrayList<>();
         for (FoundWord foundWord : foundWords)
-            coordinates.addAll(getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
-        for (Coordinate coordinate : coordinates) {
-            TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
-            TextView text = (TextView) row.getChildAt(coordinate.y);
-            text.setBackgroundColor(Color.GREEN);
+            coordinatesLists.add(getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
+        for (List<Coordinate> coordinates : coordinatesLists) {
+            for (Coordinate coordinate : coordinates) {
+                for (Coordinate coord : colourMapping.keySet()) {
+                    if (coord.equals(coordinate)) {
+                        Integer fromMap = colourMapping.get(coord);
+                        if (fromMap != null) {
+                            colourFound = true;
+                            colour = fromMap;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!colourFound)
+                colour = getRandomColour();
+            for (Coordinate coordinate : coordinates) {
+                TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
+                TextView text = (TextView) row.getChildAt(coordinate.y);
+                text.setBackgroundColor(colour);
+                colourMapping.put(coordinate, colour);
+            }
         }
     }
 
@@ -332,5 +360,17 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             }
         }
         return coordinates;
+    }
+
+    private int getRandomColour() {
+        Random r = new Random();
+        return Color.argb(255, r.nextInt(256), r.nextInt(256), r.nextInt(256));
+    }
+
+    private void updateFoundWordsText() {
+        StringBuilder builder = new StringBuilder();
+        for (FoundWord foundWord : dataStore.getFoundWords())
+            builder.append(foundWord.toString()).append("\n");
+        foundWordsText.setText(builder.toString().trim());
     }
 }

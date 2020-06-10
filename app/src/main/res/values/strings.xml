@@ -22,4 +22,5 @@
     <string name="solve_button_text">Solve Wordsearch</string>
     <string name="must_be_saved_text">Wordsearch and word list must be saved before solving!</string>
     <string name="solution_heading">Wordsearch Solution</string>
+    <string name="solved_words_text">Solved words and locations will appear here</string>
 </resources>
