@@ -198,6 +198,15 @@
                 android:hint="@string/solved_words_text"
                 android:inputType="textMultiLine" />
 
+			<Button
+				android:id="@+id/saveSolutionButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:layout_marginBottom="10dp"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_solution_button" />
+
         </LinearLayout>
 
     </LinearLayout>

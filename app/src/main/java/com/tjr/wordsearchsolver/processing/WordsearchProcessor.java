@@ -31,7 +31,6 @@ public class WordsearchProcessor {
                     dfs(board, new boolean[m][n], "", i, j, new ArrayList<>(), trie, SearchDirection.HORIZONTAL);
             }
 
-            removeFoundWords(words, result);
             if (!words.isEmpty()) {
                 trie = buildTrie(words);
                 for (int i = 0; i < m; i++) {
@@ -40,7 +39,6 @@ public class WordsearchProcessor {
                 }
             }
 
-            removeFoundWords(words, result);
             if (!words.isEmpty()) {
                 trie = buildTrie(words);
                 for (int i = 0; i < m; i++) {
@@ -49,7 +47,6 @@ public class WordsearchProcessor {
                 }
             }
 
-            removeFoundWords(words, result);
             if (!words.isEmpty()) {
                 trie = buildTrie(words);
                 for (int i = 0; i < m; i++) {

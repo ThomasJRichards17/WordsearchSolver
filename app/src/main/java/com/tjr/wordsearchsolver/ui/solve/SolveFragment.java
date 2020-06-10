@@ -14,6 +14,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -107,6 +108,8 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
         solvedWordsearchGrid = root.findViewById(R.id.solvedWordsearchGrid);
         foundWordsText = root.findViewById(R.id.solvedWordsText);
+        Button saveSolutionButton = root.findViewById(R.id.saveSolutionButton);
+        saveSolutionButton.setOnClickListener(this);
 
         loadStoredValues();
 
@@ -124,6 +127,9 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.solveWordsearchButton:
                 solveWordsearch();
+                break;
+            case R.id.saveSolutionButton:
+                saveSolution();
                 break;
         }
     }
@@ -178,7 +184,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void saveWordsearch() {
-        if (!wordsearchText.getText().toString().isEmpty()) {
+        if (!wordsearchText.getText().toString().isEmpty() && !wordsearchSaved) {
             List<List<Character>> characters = new ArrayList<>();
             String[] rows = wordsearchText.getText().toString().split("\n");
             for (String row : rows) {
@@ -191,17 +197,35 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             dataStore.setWordsearchGrid(characters);
             setWordsearchSavedText(true);
             wordsearchSaved = true;
+
+            Snackbar wordsearchSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Wordsearch successfully saved!", Snackbar.LENGTH_SHORT);
+            wordsearchSaved.setBackgroundTint(Color.parseColor("#228B22"));
+            wordsearchSaved.show();
         }
     }
 
     private void saveWords() {
-        if (!wordsText.getText().toString().isEmpty()) {
+        if (!wordsText.getText().toString().isEmpty() && !wordsSaved) {
             String[] splitWords = wordsText.getText().toString().split(", ");
             List<String> words = new ArrayList<>();
             Collections.addAll(words, splitWords);
             dataStore.setSearchWords(words);
             setWordsSavedText(true);
             wordsSaved = true;
+
+            Snackbar wordsSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Words list successfully saved!", Snackbar.LENGTH_SHORT);
+            wordsSaved.setBackgroundTint(Color.parseColor("#228B22"));
+            wordsSaved.show();
+        }
+    }
+
+    private void saveSolution() {
+        if (solvedWordsearchGrid.getVisibility() == View.VISIBLE) {
+
+        } else {
+            Snackbar solutionNotSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Solution can't be saved - please solve a wordsearch first!", Snackbar.LENGTH_SHORT);
+            solutionNotSaved.setBackgroundTint(Color.parseColor("#B22222"));
+            solutionNotSaved.show();
         }
     }
 
@@ -235,22 +259,25 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 board[i++] = array;
             }
 
+            List<String> searchWords = dataStore.getSearchWords();
             Future<List<FoundWord>> foundWordsFuture = null;
             lock.lock();
             try {
-                foundWordsFuture = wordsearchProcessor.findWords(board, new ArrayList<>(dataStore.getSearchWords()));
+                foundWordsFuture = wordsearchProcessor.findWords(board, new ArrayList<>(searchWords));
             } finally {
                 lock.unlock();
                 if (foundWordsFuture != null) {
                     try {
-                        dataStore.setFoundWords(foundWordsFuture.get());
+                        List<FoundWord> foundWords = foundWordsFuture.get();
+                        dataStore.setFoundWords(foundWords);
                         solvedWordsearchGrid.removeAllViews();
                         drawSolvedWordsearchGrid();
-                        highlightFoundWords(foundWordsFuture.get());
+                        highlightFoundWords(foundWords);
                         stopTime = System.currentTimeMillis();
                         Snackbar wordsearchSolved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve),
-                                MessageFormat.format("{0}/{1} words were found in {2} seconds - scroll down to view the solutions", new HashSet<>(foundWordsFuture.get()).size(),
-                                        dataStore.getSearchWords().size(), ((double) (stopTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+                                MessageFormat.format("{0}/{1} words were found in {2} seconds - scroll down to view the solutions",
+                                        foundWords.size() > searchWords.size() ? searchWords.size() : new HashSet<>(foundWords).size(),
+                                        searchWords.size(), ((double) (stopTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
                         wordsearchSolved.setBackgroundTint(Color.parseColor("#228B22"));
                         wordsearchSolved.show();
                         updateFoundWordsText();
@@ -305,8 +332,14 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 }
             }
 
-            if (!colourFound)
-                colour = getRandomColour();
+            if (!colourFound) {
+                while (!colourFound) {
+                    colour = getRandomColour();
+                    if (ColorUtils.calculateLuminance(colour) < 0.85 && ColorUtils.calculateLuminance(colour) > 0.35)
+                        colourFound = true;
+                }
+                colourFound = false;
+            }
             for (Coordinate coordinate : coordinates) {
                 TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
                 TextView text = (TextView) row.getChildAt(coordinate.y);
