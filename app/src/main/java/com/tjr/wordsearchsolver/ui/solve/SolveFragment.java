@@ -1,14 +1,20 @@
 package com.tjr.wordsearchsolver.ui.solve;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -18,22 +24,28 @@ import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.Coordinate;
 import com.tjr.wordsearchsolver.data.DataStore;
 import com.tjr.wordsearchsolver.data.FoundWord;
+import com.tjr.wordsearchsolver.data.Solution;
 import com.tjr.wordsearchsolver.processing.WordsearchProcessor;
+import com.tjr.wordsearchsolver.utils.WordsearchUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
@@ -45,6 +57,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     private ReentrantLock lock = new ReentrantLock();
     private DataStore dataStore;
     private WordsearchProcessor wordsearchProcessor;
+    private WordsearchUtils wordsearchUtils;
 
     private TextView wordsearchText;
     private TextView wordsearchSavedText;
@@ -56,12 +69,14 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private boolean wordsearchSaved;
     private boolean wordsSaved;
+    private String fileName;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_solve, container, false);
 
         dataStore = DataStore.getDataStore();
         wordsearchProcessor = new WordsearchProcessor();
+        wordsearchUtils = new WordsearchUtils();
 
         wordsearchText = root.findViewById(R.id.loadedWordsearchText);
         wordsearchText.addTextChangedListener(new TextWatcher() {
@@ -220,8 +235,25 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void saveSolution() {
-        if (solvedWordsearchGrid.getVisibility() == View.VISIBLE) {
-
+        if (solvedWordsearchGrid.getChildCount() != 0) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Save Wordsearch Solution");
+            final EditText input = new EditText(requireActivity().getApplicationContext());
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            input.setHint("Please enter the name of the solution:");
+            builder.setView(input);
+            builder.setPositiveButton("Save", (dialog, which) -> {
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                fileName = input.getText().toString();
+                if (TextUtils.isEmpty(fileName))
+                    return;
+                writeSolutionToFile();
+                dialog.dismiss();
+            });
         } else {
             Snackbar solutionNotSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Solution can't be saved - please solve a wordsearch first!", Snackbar.LENGTH_SHORT);
             solutionNotSaved.setBackgroundTint(Color.parseColor("#B22222"));
@@ -243,6 +275,22 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_saved_text));
         else
             wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_unsaved_text));
+    }
+
+    private void writeSolutionToFile() {
+        String fileName = "saved_solutions.json";
+        File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File solutionsFile = new File(storageDir, fileName);
+
+        setColoursToFoundWords();
+        Solution solutionToWrite = new Solution(fileName, dataStore.getFoundWords(), dataStore.getWordsearchGrid());
+        String solutionString = new Gson().toJson(solutionToWrite);
+
+        try {
+            Writer writer = new FileWriter(solutionsFile);
+        } catch (IOException e) {
+            logger.error("Error saving wordsearch solution");
+        }
     }
 
     private void solveWordsearch() {
@@ -317,7 +365,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         HashMap<Coordinate, Integer> colourMapping = new HashMap<>();
         List<List<Coordinate>> coordinatesLists = new ArrayList<>();
         for (FoundWord foundWord : foundWords)
-            coordinatesLists.add(getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
+            coordinatesLists.add(wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
         for (List<Coordinate> coordinates : coordinatesLists) {
             for (Coordinate coordinate : coordinates) {
                 for (Coordinate coord : colourMapping.keySet()) {
@@ -334,7 +382,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
             if (!colourFound) {
                 while (!colourFound) {
-                    colour = getRandomColour();
+                    colour = wordsearchUtils.getRandomColour();
                     if (ColorUtils.calculateLuminance(colour) < 0.85 && ColorUtils.calculateLuminance(colour) > 0.35)
                         colourFound = true;
                 }
@@ -349,55 +397,11 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private List<Coordinate> getCoordinatesBetweenPoints(Coordinate start, Coordinate end) {
-        List<Coordinate> coordinates = new ArrayList<>();
-
-        int startX = start.x;
-        int endX = end.x;
-        int startY = start.y;
-        int endY = end.y;
-
-        if (startX > endX) {
-            int diff = startX - endX;
-            if (startY > endY) {
-                for (int i = 0; i <= diff; i++)
-                    coordinates.add(new Coordinate(startX - i, startY - i));
-            } else if (endY > startY) {
-                for (int i = 0; i <= diff; i++)
-                    coordinates.add(new Coordinate(startX - i, startY + i));
-            } else {
-                for (int i = startX; i >= endX; i--)
-                    coordinates.add(new Coordinate(i, startY));
-            }
-        } else if (startX < endX) {
-            int diff = endX - startX;
-            if (startY > endY) {
-                for (int i = 0; i <= diff; i++)
-                    coordinates.add(new Coordinate(startX + i, startY - i));
-            } else if (endY > startY) {
-                for (int i = 0; i <= diff; i++)
-                    coordinates.add(new Coordinate(startX + i, startY + i));
-            } else {
-                for (int i = startX; i <= endX; i++)
-                    coordinates.add(new Coordinate(i, startY));
-            }
-        } else {
-            if (startY > endY) {
-                for (int i = endY; i <= startY; i++)
-                    coordinates.add(new Coordinate(startX, i));
-            } else if (endY > startY) {
-                for (int i = startY; i <= endY; i++)
-                    coordinates.add(new Coordinate(startX, i));
-            } else {
-                coordinates.add(new Coordinate(startX, startY));
-            }
+    private void setColoursToFoundWords() {
+        for (FoundWord foundWord : dataStore.getFoundWords()) {
+            TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(foundWord.start.x);
+            foundWord.wordColour = ((ColorDrawable) row.getChildAt(foundWord.start.y).getBackground()).getColor();
         }
-        return coordinates;
-    }
-
-    private int getRandomColour() {
-        Random r = new Random();
-        return Color.argb(255, r.nextInt(256), r.nextInt(256), r.nextInt(256));
     }
 
     private void updateFoundWordsText() {
