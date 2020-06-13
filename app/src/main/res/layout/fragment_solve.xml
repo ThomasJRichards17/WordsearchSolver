@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/solveScrollContainer"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:paddingBottom="50dp">
+
+	<LinearLayout
+		android:id="@+id/containerLayout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/linearLayoutWordsearch"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="10dp"
+			android:gravity="center_horizontal|top"
+			android:orientation="vertical"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent">
+
+			<TextView
+				android:id="@+id/loaded_wordsearch_heading"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center_horizontal"
+				android:text="@string/subtitle_loaded_wordsearch"
+				android:textColor="@color/black"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+			<EditText
+				android:id="@+id/loadedWordsearchText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="@string/wordsearch_text_entry_hint"
+				android:importantForAutofill="no"
+				android:inputType="textMultiLine"
+				android:scrollbars="vertical"
+				android:textSize="12sp"
+				android:typeface="monospace" />
+
+            <Button
+				android:id="@+id/saveWordsearchButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_wordsearch_button" />
+
+            <TextView
+                android:id="@+id/wordsearchSavedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wordsearch_saved_text"
+                android:textColor="#000000"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+		<LinearLayout
+            android:id="@+id/linearLayoutWords"
+            android:layout_width="match_parent"
+			android:layout_height="fill_parent"
+			android:layout_marginTop="20dp"
+			android:gravity="center_horizontal|bottom"
+			android:orientation="vertical"
+			app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutWordsearch"
+			app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+				android:id="@+id/loaded_words_heading"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center_horizontal"
+				android:text="@string/subtitle_loaded_words"
+				android:textColor="@color/black"
+				android:textSize="20sp"
+				android:textStyle="bold" />
+
+			<EditText
+				android:id="@+id/loadedWordsText"
+				android:layout_width="match_parent"
+				android:layout_height="fill_parent"
+				android:hint="@string/words_text_entry_hint"
+				android:importantForAutofill="no"
+				android:inputType="textMultiLine"
+				android:scrollbars="vertical"
+				android:textSize="12sp" />
+
+			<Button
+				android:id="@+id/saveWordsButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_words_button" />
+
+            <TextView
+                android:id="@+id/wordsSavedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/words_saved_text"
+                android:textColor="#000000"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutSolve"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutWords"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/solve_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="@string/solve_heading"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/solveTipText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/solve_tip_text"
+                android:textColor="#000000" />
+
+            <Button
+                android:id="@+id/solveWordsearchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:drawableStart="@drawable/ic_words"
+                android:text="@string/solve_button_text" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutSolution"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal|bottom"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayoutSolve"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/solution_heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
+                android:text="@string/solution_heading"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TableLayout
+                android:id="@+id/solvedWordsearchGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:focusableInTouchMode="false"
+                android:stretchColumns="*"
+                tools:visibility="visible" />
+
+            <EditText
+                android:id="@+id/solvedWordsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:autofillHints="solvedWords"
+                android:ems="10"
+                android:focusable="false"
+                android:gravity="center"
+                android:hint="@string/solved_words_text"
+                android:inputType="textMultiLine" />
+
+			<Button
+				android:id="@+id/saveSolutionButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="10dp"
+				android:layout_marginBottom="10dp"
+				android:drawableStart="@drawable/ic_save"
+				android:text="@string/save_solution_button" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

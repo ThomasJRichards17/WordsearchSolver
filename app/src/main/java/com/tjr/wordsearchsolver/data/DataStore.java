@@ -7,11 +7,11 @@ import java.util.List;
 
 public class DataStore {
     private static DataStore dataStore;
-    private String trainedDataPath;
     private Uri wordsearchImagePath;
     private Uri searchWordsImagePath;
     private List<List<Character>> wordsearchGrid = new ArrayList<>();
     private List<String> searchWords = new ArrayList<>();
+    private List<FoundWord> foundWords = new ArrayList<>();
     private boolean isWordsearchFromCamera;
     private boolean areWordsFromCamera;
     
@@ -34,6 +34,7 @@ public class DataStore {
 
     public void setWordsearchImagePath(Uri wordsearchImagePath) {
         this.wordsearchImagePath = wordsearchImagePath;
+        foundWords.clear();
     }
 
     public Uri getSearchWordsImagePath() {
@@ -76,11 +77,11 @@ public class DataStore {
         this.areWordsFromCamera = areWordsFromCamera;
     }
 
-    public String getTrainedDataPath() {
-        return trainedDataPath;
+    public List<FoundWord> getFoundWords() {
+        return foundWords;
     }
 
-    public void setTrainedDataPath(String trainedDataPath) {
-        this.trainedDataPath = trainedDataPath;
+    public void setFoundWords(List<FoundWord> foundWords) {
+        this.foundWords = foundWords;
     }
 }

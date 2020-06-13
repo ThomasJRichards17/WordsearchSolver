@@ -2,6 +2,7 @@ package com.tjr.wordsearchsolver.ui.load;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,51 +11,52 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.DataStore;
-import com.tjr.wordsearchsolver.processing.WordFinder;
+import com.tjr.wordsearchsolver.processing.ImageProcessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static android.app.Activity.RESULT_OK;
-import static com.tjr.wordsearchsolver.data.RequestCodes.LOAD_WORDSEARCH_PHOTO;
-import static com.tjr.wordsearchsolver.data.RequestCodes.LOAD_WORDS_PHOTO;
-import static com.tjr.wordsearchsolver.data.RequestCodes.TAKE_WORDSEARCH_PHOTO;
-import static com.tjr.wordsearchsolver.data.RequestCodes.TAKE_WORDS_PHOTO;
+import static com.tjr.wordsearchsolver.data.RequestCode.LOAD_WORDSEARCH_PHOTO;
+import static com.tjr.wordsearchsolver.data.RequestCode.LOAD_WORDS_PHOTO;
+import static com.tjr.wordsearchsolver.data.RequestCode.TAKE_WORDSEARCH_PHOTO;
+import static com.tjr.wordsearchsolver.data.RequestCode.TAKE_WORDS_PHOTO;
 
 public class LoadFragment extends Fragment implements View.OnClickListener {
 
-    private final Logger logger = LoggerFactory.getLogger(LoadFragment.class);
+    private Logger logger = LoggerFactory.getLogger(LoadFragment.class);
+    private ReentrantLock lock = new ReentrantLock();
 
     private DataStore dataStore;
-    private WordFinder wordFinder;
+    private ImageProcessor wordFinder;
 
     private Button loadWordsearchCameraButton;
     private Button loadWordsearchPhotoButton;
     private Button loadWordsCameraButton;
     private Button loadWordsPhotoButton;
-    private TextView manualEntryText;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         View root = inflater.inflate(R.layout.fragment_load, container, false);
 
         dataStore = DataStore.getDataStore();
+        wordFinder = new ImageProcessor();
 
         // Set button listeners
         loadWordsearchCameraButton = root.findViewById(R.id.button_load_wordsearch_camera);
@@ -69,11 +71,7 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
         loadWordsPhotoButton = root.findViewById(R.id.button_load_words_photo);
         loadWordsPhotoButton.setOnClickListener(this);
 
-        manualEntryText = root.findViewById(R.id.manualTextEntry);
-
-        Executors.newSingleThreadExecutor().execute(this::loadStoredValues);
-
-        wordFinder = new WordFinder();
+        loadStoredValues();
 
         return root;
     }
@@ -82,43 +80,56 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_load_wordsearch_camera:
-                takePicture(TAKE_WORDSEARCH_PHOTO);
+                takePicture(TAKE_WORDSEARCH_PHOTO.code);
                 break;
             case R.id.button_load_wordsearch_photo:
-                selectPicture(LOAD_WORDSEARCH_PHOTO);
+                selectPicture(LOAD_WORDSEARCH_PHOTO.code);
                 break;
             case R.id.button_load_words_camera:
-                takePicture(TAKE_WORDS_PHOTO);
+                takePicture(TAKE_WORDS_PHOTO.code);
                 break;
             case R.id.button_load_words_photo:
-                selectPicture(LOAD_WORDS_PHOTO);
+                selectPicture(LOAD_WORDS_PHOTO.code);
                 break;
         }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        long startTime = System.currentTimeMillis();
+        long endTime;
         if (resultCode == RESULT_OK) {
-            if (requestCode == LOAD_WORDSEARCH_PHOTO || requestCode == LOAD_WORDS_PHOTO) {
+            if (requestCode == LOAD_WORDSEARCH_PHOTO.code || requestCode == LOAD_WORDS_PHOTO.code) {
                 Uri selectedImageURI = data.getData();
-                if (requestCode == LOAD_WORDSEARCH_PHOTO && checkBitmapIsntEmpty(selectedImageURI)) {
+                if (requestCode == LOAD_WORDSEARCH_PHOTO.code && checkBitmapIsntEmpty(selectedImageURI)) {
                     dataStore.setWordsearchImagePath(selectedImageURI);
                     dataStore.setWordsearchFromCamera(false);
-                    getWordsFromBitmap(LOAD_WORDSEARCH_PHOTO);
+                    getWordsFromBitmap(LOAD_WORDSEARCH_PHOTO.code);
                 } else {
                     dataStore.setSearchWordsImagePath(selectedImageURI);
                     dataStore.setAreWordsFromCamera(false);
-                    getWordsFromBitmap(LOAD_WORDS_PHOTO);
+                    getWordsFromBitmap(LOAD_WORDS_PHOTO.code);
                 }
-            } else if (requestCode == TAKE_WORDSEARCH_PHOTO || requestCode == TAKE_WORDS_PHOTO) {
-                if (requestCode == TAKE_WORDSEARCH_PHOTO && checkBitmapIsntEmpty(dataStore.getWordsearchImagePath())) {
+            } else if (requestCode == TAKE_WORDSEARCH_PHOTO.code || requestCode == TAKE_WORDS_PHOTO.code) {
+                if (requestCode == TAKE_WORDSEARCH_PHOTO.code && checkBitmapIsntEmpty(dataStore.getWordsearchImagePath())) {
                     dataStore.setWordsearchFromCamera(true);
-                    getWordsFromBitmap(TAKE_WORDSEARCH_PHOTO);
+                    getWordsFromBitmap(TAKE_WORDSEARCH_PHOTO.code);
                 } else if (checkBitmapIsntEmpty(dataStore.getSearchWordsImagePath())) {
                     dataStore.setAreWordsFromCamera(true);
-                    getWordsFromBitmap(TAKE_WORDS_PHOTO);
+                    getWordsFromBitmap(TAKE_WORDS_PHOTO.code);
                 }
             }
+            endTime = System.currentTimeMillis();
+            Snackbar fromImage;
+            if (requestCode == LOAD_WORDSEARCH_PHOTO.code || requestCode == TAKE_WORDSEARCH_PHOTO.code) {
+                fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), MessageFormat.format("Wordsearch loaded from image in {0} seconds",
+                        ((double) (endTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+            } else {
+                fromImage = Snackbar.make(requireActivity().findViewById(R.id.navigation_load), MessageFormat.format("Words loaded from image in {0} seconds",
+                        ((double) (endTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
+            }
+            fromImage.setBackgroundTint(Color.parseColor("#228B22"));
+            fromImage.show();
         }
     }
 
@@ -129,15 +140,13 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
 
     private void takePicture(int requestCode) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Make sure there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            // Create the File where the photo should go
             File photoFile = createImageFile(requestCode);
             Uri photoUri = FileProvider.getUriForFile(requireActivity().getApplicationContext(), "com.example.android.fileprovider", photoFile);
 
-            if (requestCode == TAKE_WORDSEARCH_PHOTO)
+            if (requestCode == TAKE_WORDSEARCH_PHOTO.code)
                 dataStore.setWordsearchImagePath(photoUri);
-            else if (requestCode == TAKE_WORDS_PHOTO)
+            else if (requestCode == TAKE_WORDS_PHOTO.code)
                 dataStore.setSearchWordsImagePath(photoUri);
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
@@ -148,9 +157,9 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
     private File createImageFile(int requestCode) {
         String imageFileName = "Image_";
 
-        if (requestCode == TAKE_WORDSEARCH_PHOTO)
+        if (requestCode == TAKE_WORDSEARCH_PHOTO.code)
             imageFileName += "Wordsearch.png";
-        else if (requestCode == TAKE_WORDS_PHOTO)
+        else if (requestCode == TAKE_WORDS_PHOTO.code)
             imageFileName += "Words.png";
 
         File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -180,54 +189,51 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
             loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
         else if (dataStore.getSearchWordsImagePath() != null)
             loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-
-        if (dataStore.getSearchWords() != null && dataStore.getSearchWords().size() != 0) {
-            StringBuilder builder = new StringBuilder();
-            for (String word : dataStore.getSearchWords()) {
-                builder.append(word);
-                builder.append(", ");
-            }
-            manualEntryText.setText(builder.substring(0, builder.toString().length() - 2));
-        }
     }
 
     private void getWordsFromBitmap(int requestCode) {
-        if (requestCode == LOAD_WORDS_PHOTO || requestCode == TAKE_WORDS_PHOTO) {
-            Future<List<String>> wordsFuture;
+        if (requestCode == LOAD_WORDS_PHOTO.code || requestCode == TAKE_WORDS_PHOTO.code) {
+            Future<List<String>> wordsFuture = null;
             try {
-                wordsFuture = wordFinder.recogniseWords(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getSearchWordsImagePath()));
-                while (!wordsFuture.isDone()) {
-
-                }
-                dataStore.setSearchWords(wordsFuture.get());
-                if (requestCode == LOAD_WORDS_PHOTO) {
-                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
-                } else {
-                    loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                lock.lock();
+                try {
+                    wordsFuture = wordFinder.recogniseWords(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getSearchWordsImagePath()));
+                } finally {
+                    lock.unlock();
+                    if (wordsFuture != null) {
+                        dataStore.setSearchWords(wordsFuture.get());
+                        if (requestCode == LOAD_WORDS_PHOTO.code) {
+                            loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                            loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
+                        } else {
+                            loadWordsCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                            loadWordsPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                        }
+                    }
                 }
             } catch (IOException e) {
                 logger.error("Error getting words from words photo", e);
             } catch (ExecutionException | InterruptedException e) {
                 logger.error("Error setting search words", e);
             }
-
-            updateDisplayedWords();
-        } else if (requestCode == LOAD_WORDSEARCH_PHOTO || requestCode == TAKE_WORDSEARCH_PHOTO) {
-            Future<List<List<Character>>> wordsearchFuture;
+        } else if (requestCode == LOAD_WORDSEARCH_PHOTO.code || requestCode == TAKE_WORDSEARCH_PHOTO.code) {
+            Future<List<List<Character>>> wordsearchFuture = null;
             try {
-                wordsearchFuture = wordFinder.recogniseWordsearch(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getWordsearchImagePath()));
-                while (!wordsearchFuture.isDone()) {
-
-                }
-                dataStore.setWordsearchGrid(wordsearchFuture.get());
-                if (requestCode == LOAD_WORDSEARCH_PHOTO) {
-                    loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsearchCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
-                } else {
-                    loadWordsearchCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
-                    loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                lock.lock();
+                try {
+                    wordsearchFuture = wordFinder.recogniseWordsearch(MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), dataStore.getWordsearchImagePath()));
+                } finally {
+                    lock.unlock();
+                    if (wordsearchFuture != null) {
+                        dataStore.setWordsearchGrid(wordsearchFuture.get());
+                        if (requestCode == LOAD_WORDSEARCH_PHOTO.code) {
+                            loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                            loadWordsearchCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_camera, null), null, null, null);
+                        } else {
+                            loadWordsearchCameraButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tick, null), null, null, null);
+                            loadWordsearchPhotoButton.setCompoundDrawablesWithIntrinsicBounds(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_photo, null), null, null, null);
+                        }
+                    }
                 }
             } catch (IOException e) {
                 logger.error("Error getting wordsearch from wordsearch photo", e);
@@ -235,13 +241,5 @@ public class LoadFragment extends Fragment implements View.OnClickListener {
                 logger.error("Error setting wordsearch", e);
             }
         }
-    }
-
-    private void updateDisplayedWords() {
-        StringBuilder csvBuilder = new StringBuilder();
-        for (String word : dataStore.getSearchWords())
-            csvBuilder.append(word).append(", ");
-        String csv = csvBuilder.toString().substring(0, csvBuilder.toString().length() - 2);
-        manualEntryText.setText(csv);
     }
 }
