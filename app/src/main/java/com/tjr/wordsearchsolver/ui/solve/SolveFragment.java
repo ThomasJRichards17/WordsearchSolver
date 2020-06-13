@@ -25,6 +25,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import com.tjr.wordsearchsolver.R;
 import com.tjr.wordsearchsolver.data.Coordinate;
 import com.tjr.wordsearchsolver.data.DataStore;
@@ -37,9 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -278,16 +280,34 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void writeSolutionToFile() {
+        Gson gson = new Gson();
+        List<Solution> savedSolutions = new ArrayList<>();
         String fileName = "saved_solutions.json";
+        boolean fileExists = false;
+
         File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File solutionsFile = new File(storageDir, fileName);
+        if (solutionsFile.exists())
+            fileExists = true;
 
         setColoursToFoundWords();
-        Solution solutionToWrite = new Solution(fileName, dataStore.getFoundWords(), dataStore.getWordsearchGrid());
-        String solutionString = new Gson().toJson(solutionToWrite);
 
         try {
-            Writer writer = new FileWriter(solutionsFile);
+            if (fileExists)
+                savedSolutions = gson.fromJson(new JsonReader(new FileReader(solutionsFile)), new TypeToken<ArrayList<Solution>>() {
+                }.getType());
+
+            Solution solutionToWrite = new Solution(fileName, dataStore.getFoundWords(), dataStore.getWordsearchGrid());
+            savedSolutions.add(solutionToWrite);
+
+            try (FileWriter writer = new FileWriter(solutionsFile)) {
+                gson.toJson(savedSolutions, writer);
+                writer.flush();
+            }
+
+            Snackbar solutionSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Solution saved! It can be loaded from the Solutions tab.", Snackbar.LENGTH_SHORT);
+            solutionSaved.setBackgroundTint(Color.parseColor("#228B22"));
+            solutionSaved.show();
         } catch (IOException e) {
             logger.error("Error saving wordsearch solution");
         }

@@ -20,4 +20,8 @@ public class FoundWord {
     public String toString() {
         return String.format("%s: %s to %s", word, start.toString(), end.toString());
     }
+
+    public boolean equals(FoundWord foundWord) {
+        return this.word.equals(foundWord.word) && this.start.equals(foundWord.start) && this.end.equals(foundWord.end);
+    }
 }

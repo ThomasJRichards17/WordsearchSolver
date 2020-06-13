@@ -55,7 +55,19 @@ public class WordsearchProcessor {
                 }
             }
 
-            return result;
+            List<FoundWord> filteredResult = new ArrayList<>();
+            for (FoundWord word : result) {
+                boolean isFound = false;
+                for (FoundWord w : filteredResult) {
+                    if (w.equals(word)) {
+                        isFound = true;
+                        break;
+                    }
+                }
+                if (!isFound) filteredResult.add(word);
+            }
+
+            return filteredResult;
         });
     }
 
@@ -114,10 +126,5 @@ public class WordsearchProcessor {
             trie.insert(word);
         }
         return trie;
-    }
-
-    private void removeFoundWords(List<String> words, List<FoundWord> foundWords) {
-        for (FoundWord foundWord : foundWords)
-            words.remove(foundWord.word);
     }
 }
