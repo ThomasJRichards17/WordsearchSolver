@@ -309,7 +309,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             solutionSaved.setBackgroundTint(Color.parseColor("#228B22"));
             solutionSaved.show();
         } catch (IOException e) {
-            logger.error("Error saving wordsearch solution");
+            logger.error("Error saving wordsearch solution - ", e);
         }
     }
 
