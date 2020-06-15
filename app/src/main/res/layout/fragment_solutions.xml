@@ -38,42 +38,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="20dp"
                 android:focusableInTouchMode="false"
-                android:stretchColumns="*">
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/solutionNameHeading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:text="@string/table_title_solution"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/loadSolutionHeading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:text="@string/table_title_load"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/deleteSolutionHeading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:text="@string/table_title_delete"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-
-                </TableRow>
-
-            </TableLayout>
+                android:stretchColumns="*" />
 
         </LinearLayout>
 
@@ -97,7 +62,8 @@
                 android:text="@string/subtitle_loaded_solution"
                 android:textColor="@color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <TableLayout
                 android:id="@+id/loadedWordsearchGrid"
@@ -118,7 +84,8 @@
                 android:focusable="false"
                 android:gravity="center"
                 android:hint="@string/loaded_words_text"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:visibility="gone" />
 
         </LinearLayout>
 
