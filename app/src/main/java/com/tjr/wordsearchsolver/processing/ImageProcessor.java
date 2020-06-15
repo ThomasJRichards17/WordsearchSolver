@@ -19,16 +19,14 @@ import java.util.concurrent.Future;
 public class ImageProcessor {
 
     private final ExecutorService executor;
-    private final ImagePreprocessor preprocessor;
 
     public ImageProcessor() {
         executor = Executors.newSingleThreadExecutor();
-        preprocessor = new ImagePreprocessor();
     }
 
     public Future<List<String>> recogniseWords(Bitmap bitmap) {
         return executor.submit(() -> {
-            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(preprocessor.preprocess(bitmap));
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
             FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
             Task<FirebaseVisionText> result = detector.processImage(image);
             try {

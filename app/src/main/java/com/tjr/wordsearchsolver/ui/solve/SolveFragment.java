@@ -54,9 +54,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SolveFragment extends Fragment implements View.OnClickListener {
 
-    private Logger logger = LoggerFactory.getLogger(SolveFragment.class);
+    private final Logger logger = LoggerFactory.getLogger(SolveFragment.class);
 
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
     private DataStore dataStore;
     private WordsearchProcessor wordsearchProcessor;
     private WordsearchUtils wordsearchUtils;

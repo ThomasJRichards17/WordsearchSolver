@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 
 public class FoundWord {
 
-    public String word;
-    public Coordinate start;
-    public Coordinate end;
+    public final Coordinate start;
+    public final Coordinate end;
+    private final String word;
     public int wordColour;
 
     public FoundWord(String word, Coordinate start, Coordinate end) {

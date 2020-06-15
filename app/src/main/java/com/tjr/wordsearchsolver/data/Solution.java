@@ -4,9 +4,9 @@ import java.util.List;
 
 public class Solution {
 
-    public String name;
-    public List<FoundWord> foundWords;
-    public List<List<Character>> grid;
+    public final String name;
+    public final List<FoundWord> foundWords;
+    public final List<List<Character>> grid;
 
     public Solution(String name, List<FoundWord> foundWords, List<List<Character>> grid) {
         this.name = name;

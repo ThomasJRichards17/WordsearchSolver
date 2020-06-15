@@ -11,22 +11,11 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 
-import org.opencv.android.OpenCVLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class MainActivity extends AppCompatActivity {
-
-    private final Logger logger = LoggerFactory.getLogger(MainActivity.class);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FirebaseApp.initializeApp(this);
-        if (OpenCVLoader.initDebug())
-            logger.info("OpenCV loaded successfully");
-        else
-            logger.error("Unable to load OpenCV");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
