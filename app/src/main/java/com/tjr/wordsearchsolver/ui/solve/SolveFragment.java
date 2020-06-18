@@ -54,9 +54,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SolveFragment extends Fragment implements View.OnClickListener {
 
-    private Logger logger = LoggerFactory.getLogger(SolveFragment.class);
+    private final Logger logger = LoggerFactory.getLogger(SolveFragment.class);
 
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
     private DataStore dataStore;
     private WordsearchProcessor wordsearchProcessor;
     private WordsearchUtils wordsearchUtils;
@@ -71,7 +71,6 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private boolean wordsearchSaved;
     private boolean wordsSaved;
-    private String fileName;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_solve, container, false);
@@ -250,11 +249,16 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             AlertDialog dialog = builder.create();
             dialog.show();
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                fileName = input.getText().toString();
-                if (TextUtils.isEmpty(fileName))
+                String solutionName = input.getText().toString();
+                if (TextUtils.isEmpty(solutionName))
                     return;
-                writeSolutionToFile();
-                dialog.dismiss();
+                if (writeSolutionToFile(solutionName)) {
+                    dialog.dismiss();
+                } else {
+                    Snackbar nameTaken = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "A solution already exists with this name - please try again with a different name!", Snackbar.LENGTH_SHORT);
+                    nameTaken.setBackgroundTint(Color.parseColor("#B22222"));
+                    nameTaken.show();
+                }
             });
         } else {
             Snackbar solutionNotSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Solution can't be saved - please solve a wordsearch first!", Snackbar.LENGTH_SHORT);
@@ -279,7 +283,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             wordsSavedText.setText(requireActivity().getResources().getString(R.string.words_unsaved_text));
     }
 
-    private void writeSolutionToFile() {
+    private boolean writeSolutionToFile(String solutionName) {
         Gson gson = new Gson();
         List<Solution> savedSolutions = new ArrayList<>();
         String fileName = "saved_solutions.json";
@@ -293,11 +297,16 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         setColoursToFoundWords();
 
         try {
-            if (fileExists)
+            if (fileExists) {
                 savedSolutions = gson.fromJson(new JsonReader(new FileReader(solutionsFile)), new TypeToken<ArrayList<Solution>>() {
                 }.getType());
+                for (Solution solution : savedSolutions) {
+                    if (solution.name.equals(solutionName))
+                        return false;
+                }
+            }
 
-            Solution solutionToWrite = new Solution(fileName, dataStore.getFoundWords(), dataStore.getWordsearchGrid());
+            Solution solutionToWrite = new Solution(solutionName, dataStore.getFoundWords(), dataStore.getWordsearchGrid());
             savedSolutions.add(solutionToWrite);
 
             try (FileWriter writer = new FileWriter(solutionsFile)) {
@@ -308,8 +317,11 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
             Snackbar solutionSaved = Snackbar.make(requireActivity().findViewById(R.id.navigation_solve), "Solution saved! It can be loaded from the Solutions tab.", Snackbar.LENGTH_SHORT);
             solutionSaved.setBackgroundTint(Color.parseColor("#228B22"));
             solutionSaved.show();
+
+            return true;
         } catch (IOException e) {
-            logger.error("Error saving wordsearch solution");
+            logger.error("Error saving wordsearch solution - ", e);
+            return false;
         }
     }
 
@@ -367,7 +379,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
 
     private TableRow buildEmptyRow(List<Character> chars) {
         TableRow row = new TableRow(requireActivity().getApplicationContext());
-        for (int i = 0; i < dataStore.getWordsearchGrid().get(0).size(); i++) {
+        for (int i = 0; i < chars.size(); i++) {
             TextView text = new TextView(requireActivity().getApplicationContext());
             text.setText(String.valueOf(chars.get(i)));
             text.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, 1f));

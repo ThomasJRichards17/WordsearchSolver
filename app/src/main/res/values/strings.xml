@@ -2,7 +2,7 @@
     <string name="app_name">Wordsearch Solver</string>
     <string name="title_load">Load</string>
     <string name="title_solve">Solve</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_solutions">Solutions</string>
     <string name="subtitle_load_wordsearch">Load Wordsearch</string>
     <string name="load_wordsearch_photo_button_text">Load From Saved Photo</string>
     <string name="load_wordsearch_camera_button_text">Load Using Camera</string>
@@ -20,8 +20,15 @@
     <string name="solve_heading">Solve Wordsearch</string>
     <string name="solve_tip_text">Make sure the wordsearch and word list are correct and saved before solving!</string>
     <string name="solve_button_text">Solve Wordsearch</string>
-    <string name="must_be_saved_text">Wordsearch and word list must be saved before solving!</string>
+    <string name="must_be_saved_text">Wordsearch and word list must be present and saved before solving!</string>
     <string name="solution_heading">Wordsearch Solution</string>
     <string name="solved_words_text">Solved words and locations will appear here</string>
     <string name="save_solution_button">Save Solution</string>
+    <string name="subtitle_saved_solutions">Saved Solutions</string>
+    <string name="table_title_solution">Solutions</string>
+    <string name="table_title_load">Load</string>
+    <string name="table_title_delete">Delete</string>
+    <string name="subtitle_loaded_solution">Loaded Solution</string>
+    <string name="loaded_words_text">Loaded words and locations will appear here once loaded</string>
+    <string name="no_solutions_saved">No solutions have been saved!</string>
 </resources>

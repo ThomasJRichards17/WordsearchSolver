@@ -1,7 +1,7 @@
 package com.tjr.wordsearchsolver.data;
 
 public class Trie {
-    private TrieNode root = new TrieNode();
+    private final TrieNode root = new TrieNode();
 
     public void insert(String word) {
         TrieNode node = root;
@@ -35,7 +35,7 @@ public class Trie {
 }
 
 class TrieNode {
-    TrieNode[] children = new TrieNode[26];
+    final TrieNode[] children = new TrieNode[26];
     String item = "";
 }
 

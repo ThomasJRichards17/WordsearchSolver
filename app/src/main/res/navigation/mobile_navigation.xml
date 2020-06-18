@@ -18,8 +18,8 @@
         tools:layout="@layout/fragment_solve" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.tjr.wordsearchsolver.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_solutions"
+        android:name="com.tjr.wordsearchsolver.ui.solutions.SolutionsFragment"
+        android:label="@string/title_solutions"
+        tools:layout="@layout/fragment_solutions" />
 </navigation>
