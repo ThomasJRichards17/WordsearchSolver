@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/solveScrollContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="50dp">
 
 	<LinearLayout
-		android:id="@+id/containerLayout"
-		android:layout_width="fill_parent"
+        android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
@@ -24,8 +22,7 @@
 			app:layout_constraintStart_toStartOf="parent">
 
 			<TextView
-				android:id="@+id/loaded_wordsearch_heading"
-				android:layout_width="wrap_content"
+                android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:gravity="center_horizontal"
 				android:text="@string/subtitle_loaded_wordsearch"
@@ -73,8 +70,7 @@
 			app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-				android:id="@+id/loaded_words_heading"
-				android:layout_width="wrap_content"
+                android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="20dp"
 				android:gravity="center_horizontal"
@@ -122,7 +118,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/solve_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -133,7 +128,6 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/solveTipText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -153,7 +147,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayoutSolution"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_marginTop="10dp"
@@ -165,7 +158,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/solution_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
