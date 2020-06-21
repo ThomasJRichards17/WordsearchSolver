@@ -9,6 +9,9 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +21,7 @@ import java.util.concurrent.Future;
 
 public class ImageProcessor {
 
+    private final Logger logger = LoggerFactory.getLogger(ImageProcessor.class);
     private final ExecutorService executor;
 
     public ImageProcessor() {
@@ -33,7 +37,7 @@ public class ImageProcessor {
                 FirebaseVisionText authResult = Tasks.await(result);
                 return formatWords(authResult.getText());
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Error recognising words in image - ", e);
                 return new ArrayList<>();
             }
         });
@@ -48,7 +52,7 @@ public class ImageProcessor {
                 FirebaseVisionText authResult = Tasks.await(result);
                 return formatWordsearch(authResult.getText());
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Error recognising wordsearch - ", e);
                 return null;
             }
         });
