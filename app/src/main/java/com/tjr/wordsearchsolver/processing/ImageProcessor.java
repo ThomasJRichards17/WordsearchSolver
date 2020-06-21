@@ -52,7 +52,6 @@ public class ImageProcessor {
                 FirebaseVisionText authResult = Tasks.await(result);
                 return formatWordsearch(authResult.getText());
             } catch (ExecutionException | InterruptedException e) {
-                logger.error("Error recognising wordsearch - ", e);
                 return null;
             }
         });
