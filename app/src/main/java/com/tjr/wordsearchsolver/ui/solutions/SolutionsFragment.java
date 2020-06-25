@@ -9,7 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT;
+
 public class SolutionsFragment extends Fragment {
 
     private final Logger logger = LoggerFactory.getLogger(SolutionsFragment.class);
@@ -48,7 +50,8 @@ public class SolutionsFragment extends Fragment {
     private TableLayout savedSolutionsTable;
     private TextView loadedSolutionHeading;
     private TableLayout loadedWordsearchGrid;
-    private EditText solvedWordsText;
+    private TableLayout loadedWordsGrid;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_solutions, container, false);
@@ -56,7 +59,7 @@ public class SolutionsFragment extends Fragment {
         savedSolutionsTable = root.findViewById(R.id.savedSolutionsGrid);
         loadedSolutionHeading = root.findViewById(R.id.loaded_solution_heading);
         loadedWordsearchGrid = root.findViewById(R.id.loadedWordsearchGrid);
-        solvedWordsText = root.findViewById(R.id.solvedWordsText);
+        loadedWordsGrid = root.findViewById(R.id.solvedWordsGrid);
 
         drawSavedSolutionsTable();
 
@@ -87,7 +90,6 @@ public class SolutionsFragment extends Fragment {
                 loadButton.setImageResource(R.drawable.ic_load);
                 loadButton.setOnClickListener(v -> {
                     loadedSolutionHeading.setVisibility(View.VISIBLE);
-                    solvedWordsText.setVisibility(View.VISIBLE);
                     loadSavedSolution(solution.name);
                 });
                 row.addView(loadButton);
@@ -181,7 +183,7 @@ public class SolutionsFragment extends Fragment {
     private void loadSavedSolution(String solutionName) {
         Solution solution = getSolutionFromList(solutionName);
         if (solution != null) {
-            updateFoundWordsText(solution);
+            drawFoundWordsGrid(solution.foundWords);
             drawSolvedWordsearchGrid(solution);
             highlightFoundWords(solution.foundWords);
         }
@@ -230,6 +232,93 @@ public class SolutionsFragment extends Fragment {
         }
     }
 
+    private void drawFoundWordsGrid(List<FoundWord> foundWords) {
+        loadedWordsGrid.removeAllViews();
+        loadedWordsGrid.addView(buildHeadingRow());
+
+        List<List<Coordinate>> coordinatesLists = new ArrayList<>();
+        WordsearchUtils wordsearchUtils = new WordsearchUtils();
+        for (FoundWord foundWord : foundWords)
+            coordinatesLists.add(wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
+
+        HashMap<Coordinate, Integer> highlightMap = new HashMap<>();
+        for (List<Coordinate> l : coordinatesLists) {
+            for (Coordinate c : l) {
+                if (highlightMap.containsKey(c)) {
+                    Integer value = highlightMap.get(c);
+                    if (value != null)
+                        highlightMap.put(c, value + 1);
+                } else
+                    highlightMap.put(c, 1);
+            }
+        }
+
+        for (FoundWord foundWord : foundWords) {
+            TableRow row = new TableRow(requireActivity().getApplicationContext());
+
+            TextView word = buildWordTextForRow(foundWord);
+            row.addView(word);
+
+            TextView location = buildLocationTextForRow(foundWord);
+            row.addView(location);
+
+            CheckBox checkBox = new CheckBox(requireActivity().getApplicationContext());
+            TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f);
+            params.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+            checkBox.setLayoutParams(params);
+            checkBox.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            checkBox.setChecked(true);
+            checkBox.setOnCheckedChangeListener((arg0, checked) -> {
+                List<Coordinate> coordinates = wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end);
+                if (!checked) {
+                    for (Coordinate coordinate : coordinates) {
+                        Integer value = highlightMap.get(coordinate);
+                        if (value != null) {
+                            if (value == 1) {
+                                TableRow coordinateRow = (TableRow) loadedWordsearchGrid.getChildAt(coordinate.x);
+                                TextView gridLetter = (TextView) coordinateRow.getChildAt(coordinate.y);
+                                gridLetter.setBackgroundColor(Color.parseColor("#FAFAFA"));
+                            }
+                            highlightMap.put(coordinate, value - 1);
+                        }
+                    }
+                } else {
+                    for (Coordinate coordinate : coordinates) {
+                        TableRow coordinateRow = (TableRow) loadedWordsearchGrid.getChildAt(coordinate.x);
+                        TextView gridLetter = (TextView) coordinateRow.getChildAt(coordinate.y);
+                        gridLetter.setBackgroundColor(foundWord.wordColour);
+                        Integer value = highlightMap.get(coordinate);
+                        if (value != null)
+                            highlightMap.put(coordinate, value + 1);
+                    }
+                }
+            });
+            row.addView(checkBox);
+
+            loadedWordsGrid.addView(row);
+        }
+    }
+
+    private TextView buildLocationTextForRow(FoundWord foundWord) {
+        TextView location = new TextView(requireActivity().getApplicationContext());
+        location.setText(String.format("%s to %s", foundWord.start.toString(), foundWord.end.toString()));
+        location.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+        location.setSingleLine();
+        location.setTextColor(Color.BLACK);
+        location.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        return location;
+    }
+
+    private TextView buildWordTextForRow(FoundWord foundWord) {
+        TextView word = new TextView(requireActivity().getApplicationContext());
+        word.setText(foundWord.word);
+        word.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+        word.setSingleLine();
+        word.setTextColor(Color.BLACK);
+        word.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        return word;
+    }
+
     private void deleteSavedSolution(String solutionName) {
         savedSolutions.remove(getSolutionFromList(solutionName));
 
@@ -246,16 +335,9 @@ public class SolutionsFragment extends Fragment {
             return;
         }
 
-        Snackbar solutionDeleted = Snackbar.make(requireActivity().findViewById(R.id.navigation_solutions), "Solution deleted!", Snackbar.LENGTH_SHORT);
+        Snackbar solutionDeleted = Snackbar.make(requireActivity().findViewById(R.id.navigation_solutions), "Solution deleted!", LENGTH_SHORT);
         solutionDeleted.setBackgroundTint(Color.parseColor("#228B22"));
         solutionDeleted.show();
-    }
-
-    private void updateFoundWordsText(Solution solution) {
-        StringBuilder builder = new StringBuilder();
-        for (FoundWord foundWord : solution.foundWords)
-            builder.append(foundWord.toString()).append("\n");
-        solvedWordsText.setText(builder.toString().trim());
     }
 
     private Solution getSolutionFromList(String solutionName) {

@@ -69,19 +69,13 @@
                 android:focusableInTouchMode="false"
                 android:stretchColumns="*" />
 
-            <EditText
-                android:id="@+id/solvedWordsText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:autofillHints="solvedWords"
-                android:ems="10"
-                android:focusable="false"
-                android:gravity="center"
-                android:hint="@string/loaded_words_text"
-                android:inputType="textMultiLine"
-                android:visibility="gone" />
+            <TableLayout
+                android:id="@+id/solvedWordsGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:focusableInTouchMode="false"
+                android:stretchColumns="*" />
 
         </LinearLayout>
 
