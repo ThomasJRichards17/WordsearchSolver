@@ -2,7 +2,7 @@ package com.tjr.wordsearchsolver.ui.solve;
 
 import android.app.AlertDialog;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -65,9 +66,9 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     private TextView wordsearchSavedText;
     private TextView wordsText;
     private TextView wordsSavedText;
-    private TextView foundWordsText;
 
     private TableLayout solvedWordsearchGrid;
+    private TableLayout solvedWordsGrid;
 
     private boolean wordsearchSaved;
     private boolean wordsSaved;
@@ -123,9 +124,10 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         solveButton.setOnClickListener(this);
 
         solvedWordsearchGrid = root.findViewById(R.id.solvedWordsearchGrid);
-        foundWordsText = root.findViewById(R.id.solvedWordsText);
         Button saveSolutionButton = root.findViewById(R.id.saveSolutionButton);
         saveSolutionButton.setOnClickListener(this);
+
+        solvedWordsGrid = root.findViewById(R.id.solvedWordsGrid);
 
         loadStoredValues();
 
@@ -177,7 +179,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         if (hasGrid && dataStore.getFoundWords() != null && dataStore.getFoundWords().size() != 0) {
             drawSolvedWordsearchGrid();
             highlightFoundWords(dataStore.getFoundWords());
-            updateFoundWordsText();
+            drawFoundWordsGrid(dataStore.getFoundWords());
         }
     }
 
@@ -294,8 +296,6 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
         if (solutionsFile.exists())
             fileExists = true;
 
-        setColoursToFoundWords();
-
         try {
             if (fileExists) {
                 savedSolutions = gson.fromJson(new JsonReader(new FileReader(solutionsFile)), new TypeToken<ArrayList<Solution>>() {
@@ -349,6 +349,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                 if (foundWordsFuture != null) {
                     try {
                         List<FoundWord> foundWords = foundWordsFuture.get();
+                        Collections.sort(foundWords, (o1, o2) -> o1.word.compareTo(o2.word));
                         dataStore.setFoundWords(foundWords);
                         solvedWordsearchGrid.removeAllViews();
                         drawSolvedWordsearchGrid();
@@ -360,7 +361,7 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
                                         searchWords.size(), ((double) (stopTime - startTime)) / 1000), Snackbar.LENGTH_SHORT);
                         wordsearchSolved.setBackgroundTint(Color.parseColor("#228B22"));
                         wordsearchSolved.show();
-                        updateFoundWordsText();
+                        drawFoundWordsGrid(foundWords);
                     } catch (ExecutionException | InterruptedException e) {
                         logger.error("Error getting found words", e);
                     }
@@ -392,54 +393,175 @@ public class SolveFragment extends Fragment implements View.OnClickListener {
     }
 
     private void highlightFoundWords(List<FoundWord> foundWords) {
-        int colour = 0;
-        boolean colourFound = false;
-        HashMap<Coordinate, Integer> colourMapping = new HashMap<>();
-        List<List<Coordinate>> coordinatesLists = new ArrayList<>();
-        for (FoundWord foundWord : foundWords)
-            coordinatesLists.add(wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
-        for (List<Coordinate> coordinates : coordinatesLists) {
+        getWordColours(foundWords);
+
+        for (FoundWord foundWord : foundWords) {
+            List<Coordinate> coordinates = wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end);
             for (Coordinate coordinate : coordinates) {
-                for (Coordinate coord : colourMapping.keySet()) {
-                    if (coord.equals(coordinate)) {
-                        Integer fromMap = colourMapping.get(coord);
-                        if (fromMap != null) {
-                            colourFound = true;
-                            colour = fromMap;
-                            break;
+                TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
+                TextView text = (TextView) row.getChildAt(coordinate.y);
+                text.setBackgroundColor(foundWord.wordColour);
+            }
+        }
+    }
+
+    private void getWordColours(List<FoundWord> foundWords) {
+        HashMap<Coordinate, Integer> coordinateMap = new HashMap<>();
+        List<List<Coordinate>> allCoordinates = new ArrayList<>();
+
+        for (FoundWord word : foundWords) {
+            List<Coordinate> coordinates = wordsearchUtils.getCoordinatesBetweenPoints(word.start, word.end);
+            allCoordinates.add(coordinates);
+            for (Coordinate coordinate : coordinates) {
+                if (coordinateMap.containsKey(coordinate)) {
+                    Integer value = coordinateMap.get(coordinate);
+                    if (value != null)
+                        coordinateMap.put(coordinate, value + 1);
+                } else {
+                    coordinateMap.put(coordinate, 1);
+                }
+            }
+        }
+
+        for (FoundWord word : foundWords) {
+            if (word.wordColour == 0) {
+                List<Coordinate> coordinates = wordsearchUtils.getCoordinatesBetweenPoints(word.start, word.end);
+                for (Coordinate coordinate : coordinates) {
+                    Integer value = coordinateMap.get(coordinate);
+                    if (value != null && value > 1) {
+                        for (int i = 0; i < allCoordinates.size(); i++) {
+                            List<Coordinate> coords = allCoordinates.get(i);
+                            if (!coords.equals(coordinates)) {
+                                if (coords.contains(coordinate))
+                                    word.wordColour = foundWords.get(i).wordColour;
+                            }
+                        }
+                    }
+
+                    if (word.wordColour == 0) {
+                        boolean colourFound = false;
+                        while (!colourFound) {
+                            int colour = wordsearchUtils.getRandomColour();
+                            if (ColorUtils.calculateLuminance(colour) < 0.85 && ColorUtils.calculateLuminance(colour) > 0.30) {
+                                word.wordColour = colour;
+                                colourFound = true;
+                            }
                         }
                     }
                 }
             }
+        }
+    }
 
-            if (!colourFound) {
-                while (!colourFound) {
-                    colour = wordsearchUtils.getRandomColour();
-                    if (ColorUtils.calculateLuminance(colour) < 0.85 && ColorUtils.calculateLuminance(colour) > 0.35)
-                        colourFound = true;
+    private void drawFoundWordsGrid(List<FoundWord> foundWords) {
+        solvedWordsGrid.removeAllViews();
+        solvedWordsGrid.addView(buildHeadingRow());
+
+        List<List<Coordinate>> coordinatesLists = new ArrayList<>();
+        for (FoundWord foundWord : foundWords)
+            coordinatesLists.add(wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end));
+
+        for (FoundWord foundWord : foundWords) {
+            TableRow row = new TableRow(requireActivity().getApplicationContext());
+
+            TextView word = new TextView(requireActivity().getApplicationContext());
+            word.setText(foundWord.word);
+            word.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+            word.setSingleLine();
+            word.setTextColor(Color.BLACK);
+            word.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            row.addView(word);
+
+            TextView location = new TextView(requireActivity().getApplicationContext());
+            location.setText(String.format("%s to %s", foundWord.start.toString(), foundWord.end.toString()));
+            location.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+            location.setSingleLine();
+            location.setTextColor(Color.BLACK);
+            location.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            row.addView(location);
+
+            CheckBox checkBox = new CheckBox(requireActivity().getApplicationContext());
+            TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f);
+            params.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+            checkBox.setLayoutParams(params);
+            checkBox.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            checkBox.setChecked(true);
+            checkBox.setOnCheckedChangeListener((arg0, checked) -> {
+                List<Coordinate> coordinates = wordsearchUtils.getCoordinatesBetweenPoints(foundWord.start, foundWord.end);
+                if (!checked) {
+                    HashMap<Coordinate, Integer> coordinatesMap = new HashMap<>();
+                    for (List<Coordinate> l : coordinatesLists)
+                        for (Coordinate c : l) {
+                            if (coordinatesMap.containsKey(c)) {
+                                Integer value = coordinatesMap.get(c);
+                                if (value != null)
+                                    coordinatesMap.put(c, value + 1);
+                            } else
+                                coordinatesMap.put(c, 1);
+                        }
+
+                    for (Coordinate coordinate : coordinates) {
+                        Integer value = coordinatesMap.get(coordinate);
+                        if (value != null && value == 1) {
+                            TableRow coordinateRow = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
+                            TextView gridLetter = (TextView) coordinateRow.getChildAt(coordinate.y);
+                            if (getView() != null)
+                                gridLetter.setBackgroundColor(Color.parseColor("#FAFAFA"));
+                            else
+                                gridLetter.setBackgroundColor(Color.WHITE);
+                        }
+                    }
+                } else {
+                    for (Coordinate coordinate : coordinates) {
+                        TableRow coordinateRow = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
+                        TextView gridLetter = (TextView) coordinateRow.getChildAt(coordinate.y);
+                        gridLetter.setBackgroundColor(foundWord.wordColour);
+                    }
                 }
-                colourFound = false;
-            }
-            for (Coordinate coordinate : coordinates) {
-                TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(coordinate.x);
-                TextView text = (TextView) row.getChildAt(coordinate.y);
-                text.setBackgroundColor(colour);
-                colourMapping.put(coordinate, colour);
-            }
+            });
+            row.addView(checkBox);
+
+            solvedWordsGrid.addView(row);
         }
+
     }
 
-    private void setColoursToFoundWords() {
-        for (FoundWord foundWord : dataStore.getFoundWords()) {
-            TableRow row = (TableRow) solvedWordsearchGrid.getChildAt(foundWord.start.x);
-            foundWord.wordColour = ((ColorDrawable) row.getChildAt(foundWord.start.y).getBackground()).getColor();
-        }
-    }
+    private TableRow buildHeadingRow() {
+        TableRow headingRow = new TableRow(requireActivity().getApplicationContext());
+        TableLayout.LayoutParams layoutParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0, 0, 0, 15);
+        headingRow.setLayoutParams(layoutParams);
 
-    private void updateFoundWordsText() {
-        StringBuilder builder = new StringBuilder();
-        for (FoundWord foundWord : dataStore.getFoundWords())
-            builder.append(foundWord.toString()).append("\n");
-        foundWordsText.setText(builder.toString().trim());
+        TextView nameHeading = new TextView(requireActivity().getApplicationContext());
+        nameHeading.setText(R.string.table_title_word);
+        nameHeading.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+        nameHeading.setSingleLine();
+        nameHeading.setTextColor(Color.BLACK);
+        nameHeading.setTextSize(17f);
+        nameHeading.setTypeface(nameHeading.getTypeface(), Typeface.BOLD);
+        nameHeading.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        headingRow.addView(nameHeading);
+
+        TextView loadHeading = new TextView(requireActivity().getApplicationContext());
+        loadHeading.setText(R.string.table_title_location);
+        loadHeading.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+        loadHeading.setSingleLine();
+        loadHeading.setTextColor(Color.BLACK);
+        loadHeading.setTextSize(17f);
+        loadHeading.setTypeface(loadHeading.getTypeface(), Typeface.BOLD);
+        loadHeading.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        headingRow.addView(loadHeading);
+
+        TextView deleteHeading = new TextView(requireActivity().getApplicationContext());
+        deleteHeading.setText(R.string.table_title_highlight);
+        deleteHeading.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 1f));
+        deleteHeading.setSingleLine();
+        deleteHeading.setTextColor(Color.BLACK);
+        deleteHeading.setTextSize(17f);
+        deleteHeading.setTypeface(deleteHeading.getTypeface(), Typeface.BOLD);
+        deleteHeading.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+        headingRow.addView(deleteHeading);
+
+        return headingRow;
     }
 }

@@ -29,8 +29,11 @@ public class Coordinate {
         return hash;
     }
 
-
-    public boolean equals(Coordinate coordinate) {
-        return this.x == coordinate.x && this.y == coordinate.y;
+    public boolean equals(Object coordinate) {
+        if (coordinate.getClass().equals(Coordinate.class)) {
+            Coordinate coord = (Coordinate) coordinate;
+            return this.x == coord.x && this.y == coord.y;
+        }
+        return false;
     }
 }

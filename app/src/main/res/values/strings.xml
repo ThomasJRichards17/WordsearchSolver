@@ -22,7 +22,6 @@
     <string name="solve_button_text">Solve Wordsearch</string>
     <string name="must_be_saved_text">Wordsearch and word list must be present and saved before solving!</string>
     <string name="solution_heading">Wordsearch Solution</string>
-    <string name="solved_words_text">Solved words and locations will appear here</string>
     <string name="save_solution_button">Save Solution</string>
     <string name="subtitle_saved_solutions">Saved Solutions</string>
     <string name="table_title_solution">Solutions</string>
@@ -31,4 +30,7 @@
     <string name="subtitle_loaded_solution">Loaded Solution</string>
     <string name="loaded_words_text">Loaded words and locations will appear here once loaded</string>
     <string name="no_solutions_saved">No solutions have been saved!</string>
+    <string name="table_title_word">Word</string>
+    <string name="table_title_location">Location</string>
+    <string name="table_title_highlight">Highlight</string>
 </resources>

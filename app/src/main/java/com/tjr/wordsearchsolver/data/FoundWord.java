@@ -6,7 +6,7 @@ public class FoundWord {
 
     public final Coordinate start;
     public final Coordinate end;
-    private final String word;
+    public final String word;
     public int wordColour;
 
     public FoundWord(String word, Coordinate start, Coordinate end) {
@@ -21,7 +21,12 @@ public class FoundWord {
         return String.format("%s: %s to %s", word, start.toString(), end.toString());
     }
 
-    public boolean equals(FoundWord foundWord) {
-        return this.word.equals(foundWord.word) && this.start.equals(foundWord.start) && this.end.equals(foundWord.end);
+    @Override
+    public boolean equals(Object foundWord) {
+        if (foundWord.getClass().equals(FoundWord.class)) {
+            FoundWord fWord = (FoundWord) foundWord;
+            return this.word.equals(fWord.word) && this.start.equals(fWord.start) && this.end.equals(fWord.end);
+        }
+        return false;
     }
 }
